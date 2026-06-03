@@ -40,8 +40,14 @@
         padding: 12px 15px;
         border: 1px solid #ccc;
         border-radius: 8px;
+        background-color: transparent;
         font-family: inherit;
         font-size: 1rem;
+        transition: border-color 0.3s;
+      }
+      .form-control:focus {
+        border-color: var(--color-primary-brown);
+        outline: none;
       }
       .form-row {
         display: grid;
@@ -144,6 +150,10 @@
         .form-row, .radio-card-wrapper, .addon-list {
           grid-template-columns: 1fr;
         }
+        .form-row.keep-row {
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+        }
         .form-container {
           padding: 20px;
         }
@@ -178,8 +188,8 @@
           Sudah reservasi? <a href="/pages/check-reservation.html" style="color: var(--color-primary-brown); font-weight: 600; text-decoration: underline;">Cek status/invoice Anda di sini.</a>
         </p>
         <form id="reservation-form">
-          <!-- 1. Data Diri -->
-          <h2 class="section-title">1. Data Pemesan</h2>
+          <!-- Data Diri -->
+          <h2 class="section-title">Data Pemesan</h2>
           <div class="form-group">
             <label for="nama">Nama Lengkap *</label>
             <input type="text" id="nama" class="form-control" required placeholder="Masukkan nama Anda">
@@ -214,9 +224,9 @@
             </div>
           </div>
 
-          <!-- 2. Jadwal -->
-          <h2 class="section-title">2. Jadwal Camping</h2>
-          <div class="form-row">
+          <!-- Jadwal -->
+          <h2 class="section-title">Jadwal Camping</h2>
+          <div class="form-row keep-row">
             <div class="form-group">
               <label for="checkin">Tanggal Check-in *</label>
               <input type="date" id="checkin" class="form-control" required>
@@ -260,8 +270,8 @@
             Jumlah total peserta (Dewasa + Anak) melebihi kapasitas maksimal tenda yang disewa. Silakan tambah jumlah paket tenda Anda.
           </div>
 
-          <!-- 3. Paket -->
-          <h2 class="section-title">3. Pilihan Paket</h2>
+          <!-- Paket -->
+          <h2 class="section-title">Pilihan Paket</h2>
           <div class="package-list-wrapper" id="paket-container" style="display: flex; flex-direction: column; gap: 15px;">
             
             <!-- Group Lengkap -->
@@ -368,8 +378,8 @@
             </div>
           </div>
 
-          <!-- 4. Add-on -->
-          <h2 class="section-title">4. Tambahan Sewa Alat & Ekstra</h2>
+          <!-- Add-on -->
+          <h2 class="section-title">Tambahan Sewa Alat & Ekstra</h2>
           <div class="addon-list" id="main-addon-list" style="display: grid; grid-template-columns: 1fr; gap: 15px;">
             <div class="addon-item" style="display: flex; justify-content: space-between; align-items: center;">
               <span>Paket Grill (Rp 130.000)</span>
