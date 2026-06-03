@@ -246,38 +246,42 @@
 
         <!-- Jadwal -->
         <h2 class="section-title">Jadwal Camping</h2>
-        <div class="form-group">
-          <label for="checkin">Tanggal Check-in *</label>
-          <input type="date" id="checkin" class="form-control" required>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="checkin">Tanggal Check-in *</label>
+            <input type="date" id="checkin" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="checkout">Tanggal Check-out *</label>
+            <input type="date" id="checkout" class="form-control" required>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="checkout">Tanggal Check-out *</label>
-          <input type="date" id="checkout" class="form-control" required>
-        </div>
-        <div class="form-group">
-          <label for="jam_kedatangan">Jam Kedatangan *</label>
-          <input type="time" id="jam_kedatangan" class="form-control" required>
-        </div>
-        <div class="form-group">
-          <label for="area_camp">
-            Area Camp *
-            <a href="/pages/area.html" target="_blank"
-              style="margin-left: 10px; font-size: 0.85rem; color: var(--color-primary-brown); text-decoration: none; font-weight: bold;">
-              <i class='bx bx-info-circle'></i> Info Area
-            </a>
-          </label>
-          <select id="area_camp" class="form-control" required>
-            <option value="" disabled selected>Pilih Area Camp</option>
-            <option value="Area 1">Area 1</option>
-            <option value="Area 2">Area 2</option>
-            <option value="Area 3">Area 3</option>
-            <option value="Area 4">Area 4</option>
-            <option value="Area 5">Area 5</option>
-            <option value="Area 6">Area 6</option>
-            <option value="Area 7">Area 7</option>
-            <option value="Area 8">Area 8</option>
-            <option value="Campervan">Campervan</option>
-          </select>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="jam_kedatangan">Jam Kedatangan *</label>
+            <input type="time" id="jam_kedatangan" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="area_camp">
+              Area Camp *
+              <a href="/pages/area.html" target="_blank"
+                style="margin-left: 10px; font-size: 0.85rem; color: var(--color-primary-brown); text-decoration: none; font-weight: bold;">
+                <i class='bx bx-info-circle'></i> Info Area
+              </a>
+            </label>
+            <select id="area_camp" class="form-control" required>
+              <option value="" disabled selected>Pilih Area Camp</option>
+              <option value="Area 1">Area 1</option>
+              <option value="Area 2">Area 2</option>
+              <option value="Area 3">Area 3</option>
+              <option value="Area 4">Area 4</option>
+              <option value="Area 5">Area 5</option>
+              <option value="Area 6">Area 6</option>
+              <option value="Area 7">Area 7</option>
+              <option value="Area 8">Area 8</option>
+              <option value="Campervan">Campervan</option>
+            </select>
+          </div>
         </div>
         <p id="night-count"
           style="font-weight: 600; color: var(--color-primary-brown); margin-top: -10px; margin-bottom: 20px;">Durasi: 1
