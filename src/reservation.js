@@ -288,6 +288,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const wa = document.getElementById('wa').value;
     const dewasa = document.getElementById('jml_dewasa').value;
     const anak = document.getElementById('jml_anak').value;
+    
+    // New Fields
+    const jmlMotor = document.getElementById('jml_motor').value || "0";
+    const jmlMobil = document.getElementById('jml_mobil').value || "0";
+    const jamKedatangan = document.getElementById('jam_kedatangan').value;
+    const areaCamp = document.getElementById('area_camp').value;
+
     const checkin = checkinInput.value;
     const checkout = checkoutInput.value;
     const nights = calculateNights();
@@ -333,10 +340,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('email').value) {
       message += `Email: ${document.getElementById('email').value}\n`;
     }
-    message += `Peserta: ${dewasa} Dewasa, ${anak} Anak\n\n`;
-    message += `*Jadwal*\n`;
+    message += `Peserta: ${dewasa} Dewasa, ${anak} Anak\n`;
+    message += `Kendaraan: ${jmlMotor} Motor, ${jmlMobil} Mobil\n\n`;
+    message += `*Jadwal & Lokasi*\n`;
     message += `Check-in: ${checkin}\n`;
-    message += `Check-out: ${checkout} (${nights} Malam)\n\n`;
+    message += `Check-out: ${checkout} (${nights} Malam)\n`;
+    message += `Jam Kedatangan: ${jamKedatangan}\n`;
+    message += `Area Camp: ${areaCamp}\n\n`;
     message += `*Pilihan Paket*\n`;
     message += `${paketText}\n`;
     message += `*Alat Tambahan*\n`;
@@ -353,9 +363,13 @@ document.addEventListener('DOMContentLoaded', () => {
       email: email,
       dewasa: parseInt(dewasa),
       anak: parseInt(anak) || 0,
+      motor: parseInt(jmlMotor) || 0,
+      mobil: parseInt(jmlMobil) || 0,
       checkin: checkin,
       checkout: checkout,
+      jamKedatangan: jamKedatangan,
       nights: nights,
+      area: areaCamp,
       paketText: paketText.trim(),
       addonsText: addonsText.trim(),
       total: total

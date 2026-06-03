@@ -173,12 +173,10 @@
     </div>
 
     <main class="container">
-      <div style="text-align: center; margin-bottom: 20px;">
-        <p style="background: var(--color-broken-white); display: inline-block; padding: 10px 20px; border-radius: 8px; border: 1px solid #ddd;">
-          Sudah reservasi? <a href="/pages/check-reservation.html" style="color: var(--color-primary-brown); font-weight: bold; text-decoration: underline;">Cek status/invoice Anda di sini.</a>
-        </p>
-      </div>
       <div class="form-container">
+        <p style="text-align: center; margin-bottom: 30px; font-size: 0.95rem; color: #555;">
+          Sudah reservasi? <a href="/pages/check-reservation.html" style="color: var(--color-primary-brown); font-weight: 600; text-decoration: underline;">Cek status/invoice Anda di sini.</a>
+        </p>
         <form id="reservation-form">
           <!-- 1. Data Diri -->
           <h2 class="section-title">1. Data Pemesan</h2>
@@ -205,6 +203,16 @@
               <small style="color: #666; font-size: 0.8rem;">Di bawah 5 tahun gratis HTM</small>
             </div>
           </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="jml_motor">Jumlah Motor (Opsional)</label>
+              <input type="number" id="jml_motor" class="form-control" min="0" value="0" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label for="jml_mobil">Jumlah Mobil (Opsional)</label>
+              <input type="number" id="jml_mobil" class="form-control" min="0" value="0" placeholder="0">
+            </div>
+          </div>
 
           <!-- 2. Jadwal -->
           <h2 class="section-title">2. Jadwal Camping</h2>
@@ -216,6 +224,32 @@
             <div class="form-group">
               <label for="checkout">Tanggal Check-out *</label>
               <input type="date" id="checkout" class="form-control" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="jam_kedatangan">Jam Kedatangan *</label>
+              <input type="time" id="jam_kedatangan" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="area_camp">
+                Area Camp * 
+                <a href="/pages/area.html" target="_blank" style="margin-left: 10px; font-size: 0.85rem; color: var(--color-primary-brown); text-decoration: none; font-weight: bold;">
+                  <i class='bx bx-info-circle'></i> Info Area
+                </a>
+              </label>
+              <select id="area_camp" class="form-control" required>
+                <option value="" disabled selected>Pilih Area Camp</option>
+                <option value="Area 1">Area 1</option>
+                <option value="Area 2">Area 2</option>
+                <option value="Area 3">Area 3</option>
+                <option value="Area 4">Area 4</option>
+                <option value="Area 5">Area 5</option>
+                <option value="Area 6">Area 6</option>
+                <option value="Area 7">Area 7</option>
+                <option value="Area 8">Area 8</option>
+                <option value="Campervan">Campervan</option>
+              </select>
             </div>
           </div>
           <p id="night-count" style="font-weight: 600; color: var(--color-primary-brown); margin-top: -10px; margin-bottom: 20px;">Durasi: 1 Malam</p>
