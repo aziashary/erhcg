@@ -193,7 +193,7 @@ header.scrolled .nav-links a {
   text-align: center;
   overflow: hidden;
   /* Premium twilight/sunset to night sky gradient */
-  background: radial-gradient(circle at bottom right, #f9a826 0%, #d65b29 12%, #2c3e50 33%, #0b1320 100%);
+  background: radial-gradient(circle at bottom, #f9a826 0%, #d65b29 12%, #2c3e50 33%, #0b1320 100%);
 }
 
 #hero-canvas {
