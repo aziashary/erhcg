@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Overview | Dashboard Rockshill</title>
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <link rel="stylesheet" href="layout.css">
+  <style>
+    .overview-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .stat-card {
+      background: var(--color-white);
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      border-left: 5px solid var(--color-primary-brown);
+    }
+    
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      background: var(--color-broken-white);
+      color: var(--color-primary-brown);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+    }
+    
+    .stat-details h3 {
+      font-size: 0.9rem;
+      color: var(--color-gray-600);
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+    
+    .stat-details h2 {
+      font-size: 1.8rem;
+      color: var(--color-dark-brown);
+      font-weight: 700;
+    }
+    
+    .recent-reservations table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .recent-reservations th, .recent-reservations td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--color-gray-200);
+    }
+    
+    .recent-reservations th {
+      color: var(--color-gray-600);
+      font-weight: 600;
+      font-size: 0.9rem;
+      background: var(--color-gray-100);
+    }
+    
+    .badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .badge-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .badge-confirmed {
+      background: #d4edda;
+      color: #155724;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="sidebar-logo">Rockshill<span>.</span></a>
+    </div>
+    
+    <div class="sidebar-menu">
+      <a href="index.html" class="menu-item active"><i class='bx bxs-dashboard'></i> Overview</a>
+      <a href="reservations.html" class="menu-item"><i class='bx bx-list-ul'></i> Reservasi</a>
+      <a href="#" class="menu-item" onclick="alert('Fitur segera hadir!')"><i class='bx bx-calendar'></i> Kalender</a>
+      <a href="#" class="menu-item" onclick="alert('Fitur segera hadir!')"><i class='bx bx-box'></i> Stok Alat</a>
+      <a href="#" class="menu-item" onclick="alert('Fitur segera hadir!')"><i class='bx bx-dollar-circle'></i> Price Master</a>
+    </div>
+    
+    <div class="sidebar-footer">
+      <p>Rockshill Admin v1.0</p>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menu-toggle"><i class='bx bx-menu'></i></button>
+        <h2 style="font-size: 1.2rem; color: var(--color-dark-brown);">Overview Dashboard</h2>
+      </div>
+      
+      <div class="topbar-right">
+        <div class="user-profile">
+          <div class="user-avatar" id="user-avatar">A</div>
+          <div class="user-info">
+            <h4 id="user-name">Admin</h4>
+            <span id="user-role">Role</span>
+          </div>
+        </div>
+        <button class="btn-logout" id="btn-logout"><i class='bx bx-log-out'></i> Keluar</button>
+      </div>
+    </header>
+    
+    <!-- Page Content -->
+    <div class="page-content">
+      <div class="page-header">
+        <h1 class="page-title">Selamat datang kembali!</h1>
+        <p style="color: var(--color-gray-600); margin-top: 5px;">Berikut adalah ringkasan data Rockshill Campground saat ini.</p>
+      </div>
+      
+      <!-- Stats -->
+      <div class="overview-cards">
+        <div class="stat-card">
+          <div class="stat-icon"><i class='bx bx-receipt'></i></div>
+          <div class="stat-details">
+            <h3>Total Reservasi</h3>
+            <h2 id="stat-total-res">0</h2>
+          </div>
+        </div>
+        
+        <div class="stat-card" style="border-left-color: #2F4A33;">
+          <div class="stat-icon" style="color: #2F4A33;"><i class='bx bx-wallet'></i></div>
+          <div class="stat-details">
+            <h3>Estimasi Revenue</h3>
+            <h2 id="stat-revenue">Rp 0</h2>
+          </div>
+        </div>
+        
+        <div class="stat-card" style="border-left-color: #d9534f;">
+          <div class="stat-icon" style="color: #d9534f;"><i class='bx bx-time'></i></div>
+          <div class="stat-details">
+            <h3>Menunggu Konfirmasi</h3>
+            <h2 id="stat-pending">0</h2>
+          </div>
+        </div>
+        
+        <div class="stat-card" style="border-left-color: #f0ad4e;">
+          <div class="stat-icon" style="color: #f0ad4e;"><i class='bx bx-group'></i></div>
+          <div class="stat-details">
+            <h3>Total Tamu Mendatang</h3>
+            <h2 id="stat-guests">0</h2>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Recent Reservations -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Reservasi Terbaru</h2>
+          <a href="reservations.html" class="btn btn-primary" style="font-size: 0.9rem; padding: 6px 12px;">Lihat Semua</a>
+        </div>
+        <div class="recent-reservations" style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice ID</th>
+                <th>Pemesan</th>
+                <th>Check-in</th>
+                <th>Paket Tenda</th>
+                <th>Status</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="recent-tbody">
+              <!-- Diisi via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <script src="/src/dashboard.js"></script>
+</body>
+</html>

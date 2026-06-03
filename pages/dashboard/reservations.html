@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Reservasi | Dashboard Rockshill</title>
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <link rel="stylesheet" href="layout.css">
+  <style>
+    .filter-bar {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .search-input {
+      flex: 1;
+      padding: 10px 15px;
+      border: 1px solid var(--color-gray-300);
+      border-radius: 8px;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: var(--color-primary-brown);
+    }
+    .filter-select {
+      padding: 10px 15px;
+      border: 1px solid var(--color-gray-300);
+      border-radius: 8px;
+      background: white;
+      outline: none;
+    }
+    
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
+    }
+    th, td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--color-gray-200);
+    }
+    th {
+      background: var(--color-gray-100);
+      color: var(--color-gray-600);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    tbody tr:hover {
+      background: #fdfdfd;
+    }
+    
+    .badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .badge-pending { background: #fff3cd; color: #856404; }
+    .badge-confirmed { background: #d4edda; color: #155724; }
+    .badge-cancelled { background: #f8d7da; color: #721c24; }
+    
+    .action-select {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--color-gray-300);
+      font-size: 0.85rem;
+      background: white;
+      cursor: pointer;
+    }
+    
+    /* Modal Detail */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .modal-content {
+      background: white;
+      width: 90%;
+      max-width: 600px;
+      border-radius: 12px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--color-gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 { color: var(--color-dark-brown); }
+    .btn-close {
+      background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--color-gray-600);
+    }
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+    .modal-body strong { color: var(--color-dark-brown); }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="sidebar-logo">Rockshill<span>.</span></a>
+    </div>
+    
+    <div class="sidebar-menu">
+      <a href="index.html" class="menu-item"><i class='bx bxs-dashboard'></i> Overview</a>
+      <a href="reservations.html" class="menu-item active"><i class='bx bx-list-ul'></i> Reservasi</a>
+      <a href="#" class="menu-item" onclick="alert('Fitur segera hadir!')"><i class='bx bx-calendar'></i> Kalender</a>
+      <a href="#" class="menu-item" onclick="alert('Fitur segera hadir!')"><i class='bx bx-box'></i> Stok Alat</a>
+      <a href="#" class="menu-item" onclick="alert('Fitur segera hadir!')"><i class='bx bx-dollar-circle'></i> Price Master</a>
+    </div>
+    
+    <div class="sidebar-footer">
+      <p>Rockshill Admin v1.0</p>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menu-toggle"><i class='bx bx-menu'></i></button>
+        <h2 style="font-size: 1.2rem; color: var(--color-dark-brown);">Manajemen Reservasi</h2>
+      </div>
+      
+      <div class="topbar-right">
+        <div class="user-profile">
+          <div class="user-avatar" id="user-avatar">A</div>
+          <div class="user-info">
+            <h4 id="user-name">Admin</h4>
+            <span id="user-role">Role</span>
+          </div>
+        </div>
+        <button class="btn-logout" id="btn-logout"><i class='bx bx-log-out'></i> Keluar</button>
+      </div>
+    </header>
+    
+    <div class="page-content">
+      <div class="card">
+        <div class="filter-bar">
+          <input type="text" id="search-inv" class="search-input" placeholder="Cari Nama atau Invoice ID...">
+          <select id="filter-status" class="filter-select">
+            <option value="all">Semua Status</option>
+            <option value="Menunggu Konfirmasi">Pending</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice ID</th>
+                <th>Pemesan</th>
+                <th>Tgl Dibuat</th>
+                <th>Check-in</th>
+                <th>Status</th>
+                <th>Aksi / Update Status</th>
+              </tr>
+            </thead>
+            <tbody id="reservations-tbody">
+              <!-- JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="detail-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Detail Reservasi</h3>
+        <button class="btn-close" id="btn-close-modal"><i class='bx bx-x'></i></button>
+      </div>
+      <div class="modal-body" id="modal-detail-body">
+        <!-- Content JS -->
+      </div>
+    </div>
+  </div>
+
+  <script src="/src/dashboard.js"></script>
+  <script src="/src/reservations-admin.js"></script>
+</body>
+</html>
