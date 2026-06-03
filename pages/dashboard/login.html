@@ -58,39 +58,26 @@
       btnSubmit.innerHTML = 'Loading...';
       btnSubmit.disabled = true;
 
-      fetch('http://localhost:8000/api/admin/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      })
-      .then(response => response.json())
-      .then(data => {
+      // Mock login logic since backend is not ready
+      setTimeout(() => {
         btnSubmit.innerHTML = 'Login';
         btnSubmit.disabled = false;
 
-        if (data.success) {
+        if (email === 'admin@rockshill.com' && password === 'admin123') {
+          const role = document.getElementById('role').value;
           const userSession = {
             isLoggedIn: true,
-            token: data.token,
-            role: data.user.role,
-            name: data.user.name,
-            email: data.user.email
+            token: 'mock-jwt-token-12345',
+            role: role,
+            name: 'Admin Rockshill',
+            email: email
           };
           localStorage.setItem('erhcg_admin_session', JSON.stringify(userSession));
           window.location.href = 'index.html';
         } else {
-          alert('Login gagal: ' + data.message);
+          alert('Login gagal: Email atau password salah. (Gunakan admin@rockshill.com / admin123)');
         }
-      })
-      .catch(error => {
-        btnSubmit.innerHTML = 'Login';
-        btnSubmit.disabled = false;
-        console.error('Error:', error);
-        alert('Terjadi kesalahan koneksi.');
-      });
+      }, 1000);
     });
     
     // Auto redirect if already logged in

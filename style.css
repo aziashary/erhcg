@@ -587,6 +587,34 @@ header.scrolled .nav-links a {
   background-color: var(--color-broken-white);
 }
 
+/* Page Header (Subpages) */
+.page-header {
+  background-color: var(--color-forest-green);
+  padding: 140px 20px 80px;
+  text-align: center;
+  color: var(--color-off-white);
+}
+.page-header h1 {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+.page-header p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    padding: 120px 20px 60px;
+  }
+  .page-header h1 {
+    font-size: 2.2rem;
+  }
+}
+
+/* Sections */
 .testimonial-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery | Rockshill Campground</title>
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .gallery-section {
+      padding: 100px 0;
+    }
+
+    /* Bento Grid / Masonry Style */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      grid-auto-rows: 220px;
+      grid-auto-flow: dense;
+      gap: 8px;
+    }
+
+    .bento-item {
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      position: relative;
+      background-color: #eee;
+    }
+
+    .bento-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+      cursor: pointer;
+    }
+
+    .bento-item:hover img {
+      transform: scale(1.08);
+    }
+
+    /* Abstract Sizing Classes */
+    .bento-item.large {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+
+    .bento-item.wide {
+      grid-column: span 2;
+      grid-row: span 1;
+    }
+
+    .bento-item.tall {
+      grid-column: span 1;
+      grid-row: span 2;
+    }
+
+    @media (max-width: 768px) {
+      .bento-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-auto-rows: 150px;
+        gap: 5px;
+      }
+    }
+
+    /* Lightbox Styles */
+    .lightbox {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .lightbox.active {
+      display: flex;
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .lightbox img {
+      max-width: 90%;
+      max-height: 90vh;
+      border-radius: 8px;
+      box-shadow: 0 5px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      color: white;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    /* Instagram CTA */
+    .ig-cta {
+      text-align: center;
+      margin-top: 60px;
+      padding: 40px;
+      background-color: var(--color-off-white);
+      border-radius: var(--border-radius);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    .ig-cta h3 {
+      font-size: 1.8rem;
+      color: var(--color-dark-brown);
+      margin-bottom: 15px;
+    }
+
+    .btn-instagram {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+      color: white;
+      padding: 15px 30px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .btn-instagram:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header id="header">
+    <div class="container header-inner">
+      <div class="logo">Rockshill.</div>
+      <nav class="nav-links">
+        <a href="/#intro">Tentang</a>
+        <a href="/#offerings">Fasilitas</a>
+        <a href="/#packages">Paket</a>
+        <a href="/pages/gallery.html">Gallery</a>
+        <a href="/#faq">FAQ</a>
+        <a href="/pages/check-reservation.html">Cek Reservasi</a>
+      </nav>
+      <a href="/pages/reservation.html" class="btn btn-primary" style="padding: 8px 20px;">Reservasi Sekarang</a>
+    </div>
+  </header>
+
+  <div class="page-header">
+    <div class="container">
+      <h1>Gallery</h1>
+    </div>
+  </div>
+
+  <br>
+
+  <main class="container gallery-section">
+    <div class="bento-grid">
+      <!-- Image 1 -->
+      <div class="bento-item large">
+        <img src="/gallery/IMG_1521.jpg" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <!-- Image 2 -->
+      <div class="bento-item wide">
+        <img src="/gallery/IMG_1522.jpg" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <!-- Image 3 -->
+      <div class="bento-item tall">
+        <img src="/gallery/IMG_1523.jpg" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <!-- Image 4 -->
+      <div class="bento-item">
+        <img src="/gallery/IMG_1067.jpg" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <!-- Image 5 -->
+      <div class="bento-item">
+        <img src="/gallery/IMG_1069.jpg" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <!-- Image 6 -->
+      <div class="bento-item wide">
+        <img src="/gallery/IMG_1516.jpg" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <!-- Image 7 -->
+      <div class="bento-item large">
+        <img src="/gallery/IMG_3822.jpg" alt="Rockshill Camp" loading="lazy">
+      </div>
+
+      <!-- Area Images -->
+      <div class="bento-item large">
+        <img src="/area/4/IMG_3274.jpg" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <div class="bento-item wide">
+        <img src="/area/3/IMG_2550.jpg" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <div class="bento-item tall">
+        <img src="/area/7/d496077a-67fd-4bdf-bfd7-afc17c156b95.JPG" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <div class="bento-item">
+        <img src="/area/1/1.jpg" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <div class="bento-item">
+        <img src="/area/2/2.JPG" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <div class="bento-item large">
+        <img src="/area/campervan/IMG_2536.jpg" alt="Rockshill Campervan" loading="lazy">
+      </div>
+      <div class="bento-item">
+        <img src="/area/3/862621da-0ae9-4fbc-8b88-f3a6a49e0e7c.JPG" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <div class="bento-item tall">
+        <img src="/area/5/IMG_2497.jpg" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <div class="bento-item wide">
+        <img src="/area/6/IMG_0251.jpg" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <div class="bento-item">
+        <img src="/area/4/92f2e601-c1e0-48a8-81c7-f75336f776bf.JPG" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <div class="bento-item">
+        <img src="/area/8/d1857b26-14e2-4b77-b34d-72e4f37f36b1.JPG" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <div class="bento-item large">
+        <img src="/area/3/18628c04-a8cc-44b8-a818-d9a60b1c0c53.JPG" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <div class="bento-item tall">
+        <img src="/area/6/93132c8e-d70c-4bfc-baf4-fea3acbacde4.JPG" alt="Rockshill Camp" loading="lazy">
+      </div>
+      <div class="bento-item">
+        <img src="/area/3/205de935-42fe-4270-b680-f9e6a704b588.JPG" alt="Rockshill Camp" loading="lazy">
+      </div>
+    </div>
+
+    <!-- Instagram CTA -->
+    <div class="ig-cta">
+      <h3>Ingin melihat update terbaru?</h3>
+      <p style="margin-bottom: 20px; color: #666;">Kunjungi Instagram kami untuk melihat lebih banyak foto, video, dan
+        ulasan dari pengunjung Rockshill Campground.</p>
+      <a href="https://www.instagram.com/rockshillcamp" target="_blank" class="btn-instagram">
+        <i class='bx bxl-instagram' style="font-size: 1.5rem;"></i> Kunjungi Instagram Kami
+      </a>
+    </div>
+  </main>
+
+  <footer
+    style="background-color: var(--color-forest-green); color: var(--color-off-white); text-align: center; padding: 30px;">
+    <p>&copy; 2026 Rockshill Campground. All rights reserved.</p>
+  </footer>
+
+  <!-- Lightbox Modal -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightbox-close">&times;</button>
+    <img id="lightbox-img" src="" alt="Full view">
+  </div>
+
+  <script>
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const closeBtn = document.getElementById('lightbox-close');
+    const galleryImages = document.querySelectorAll('.bento-item img');
+
+    galleryImages.forEach(img => {
+      img.addEventListener('click', () => {
+        lightboxImg.src = img.src;
+        lightbox.classList.add('active');
+      });
+    });
+
+    closeBtn.addEventListener('click', () => {
+      lightbox.classList.remove('active');
+    });
+
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        lightbox.classList.remove('active');
+      }
+    });
+
+    // Escape key to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+        lightbox.classList.remove('active');
+      }
+    });
+  </script>
+  <script type="module" src="/main.js"></script>
+</body>
+
+</html>

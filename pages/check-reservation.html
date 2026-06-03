@@ -8,12 +8,6 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="/style.css">
     <style>
-      .page-header {
-        background-color: var(--color-forest-green);
-        padding: 120px 0 60px;
-        text-align: center;
-        color: var(--color-off-white);
-      }
       .page-header h1 {
         font-size: 3rem;
         margin-bottom: 10px;
@@ -159,19 +153,20 @@
   </head>
   <body>
     <!-- Header -->
-    <header id="header" class="scrolled">
-      <div class="container header-inner">
-        <a href="/" class="logo">Rockshill.</a>
-        <nav class="nav-links">
-          <a href="/#intro">Tentang</a>
-          <a href="/#offerings">Fasilitas</a>
-          <a href="/#packages">Paket</a>
-          <a href="/#faq">FAQ</a>
-          <a href="/pages/check-reservation.html">Cek Reservasi</a>
-        </nav>
-        <a href="/pages/reservation.html" class="btn btn-primary" style="padding: 8px 20px;">Reservasi Sekarang</a>
-      </div>
-    </header>
+  <header id="header">
+    <div class="container header-inner">
+      <div class="logo">Rockshill.</div>
+      <nav class="nav-links">
+        <a href="/#intro">Tentang</a>
+        <a href="/#offerings">Fasilitas</a>
+        <a href="/#packages">Paket</a>
+        <a href="/pages/gallery.html">Gallery</a>
+        <a href="/#faq">FAQ</a>
+        <a href="/pages/check-reservation.html">Cek Reservasi</a>
+      </nav>
+      <a href="/pages/reservation.html" class="btn btn-primary" style="padding: 8px 20px;">Reservasi Sekarang</a>
+    </div>
+  </header>
 
     <div class="page-header">
       <div class="container">
@@ -256,5 +251,6 @@
     </footer>
 
     <script type="module" src="/src/check-reservation.js"></script>
+    <script type="module" src="/main.js"></script>
   </body>
 </html>

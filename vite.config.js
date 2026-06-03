@@ -10,6 +10,7 @@ export default defineConfig({
         reservation: resolve(__dirname, 'pages/reservation.html'),
         checkReservation: resolve(__dirname, 'pages/check-reservation.html'),
         area: resolve(__dirname, 'pages/area.html'),
+        gallery: resolve(__dirname, 'pages/gallery.html'),
       },
     },
   },
