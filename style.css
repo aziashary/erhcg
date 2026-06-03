@@ -192,25 +192,17 @@ header.scrolled .nav-links a {
   justify-content: center;
   text-align: center;
   overflow: hidden;
-  background-color: var(--color-forest-green);
+  /* Premium twilight/sunset to night sky gradient */
+  background: radial-gradient(circle at bottom right, #f9a826 0%, #d65b29 12%, #2c3e50 33%, #0b1320 100%);
 }
 
-.hero::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(to bottom, rgba(74, 47, 24, 0.6) 0%, rgba(47, 74, 51, 0.4) 100%);
-  z-index: 1;
-}
-
-.hero-img {
+#hero-canvas {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  z-index: 0;
+  z-index: 1;
 }
 
 .hero-content {
@@ -357,11 +349,65 @@ header.scrolled .nav-links a {
   transition: transform var(--transition-normal), box-shadow var(--transition-normal);
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .package-card:hover {
   transform: translateY(-10px);
   box-shadow: 0 20px 40px rgba(74, 47, 24, 0.15);
+}
+
+/* Badges for Recommended and Best Seller - Spiky Starburst Seal Shape */
+.package-badge {
+  position: absolute;
+  top: -24px;
+  right: -20px;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transform: rotate(-10deg);
+  transition: transform var(--transition-normal);
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.15));
+}
+
+.package-card:hover .package-badge {
+  transform: rotate(-15deg) scale(1.08);
+}
+
+.badge-starburst {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.badge-text {
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.68rem;
+  line-height: 1.15;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.badge-best-seller .badge-starburst polygon {
+  fill: #D97706; /* Rich warm amber/gold */
+}
+
+.badge-recommended .badge-starburst polygon {
+  fill: #4CAF50; /* Fresh, lighter green */
 }
 
 .package-header {
