@@ -77,17 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
       mouse.y = e.pageY;
     });
 
-    window.addEventListener('touchmove', (e) => {
-      if (e.touches.length > 0) {
-        mouse.x = e.touches[0].pageX;
-        mouse.y = e.touches[0].pageY;
-      }
-    });
 
-    window.addEventListener('touchend', () => {
-      mouse.x = null;
-      mouse.y = null;
-    });
 
     window.addEventListener('mouseout', () => {
       mouse.x = null;
@@ -170,9 +160,15 @@ document.addEventListener('DOMContentLoaded', () => {
       requestAnimationFrame(animate);
     }
 
+    let lastWidth = window.innerWidth;
     window.addEventListener('resize', () => {
       resize();
-      initParticles();
+      // Hanya re-init partikel jika lebar layar berubah (seperti rotasi device)
+      // agar bintang tidak berkedip/reset saat scroll di HP (karena address bar).
+      if (window.innerWidth !== lastWidth) {
+        lastWidth = window.innerWidth;
+        initParticles();
+      }
     });
 
     resize();
