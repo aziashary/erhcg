@@ -9,6 +9,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const totalPriceEl = document.getElementById('total-price');
   const capacityAlert = document.getElementById('capacity-alert');
   const submitBtn = document.getElementById('submit-btn');
+  const areaCampInput = document.getElementById('area_camp');
+
+  const infoAreaMessage = document.createElement('div');
+  infoAreaMessage.style.display = 'none';
+  infoAreaMessage.style.backgroundColor = '#e2f0d9';
+  infoAreaMessage.style.color = '#2e5c1e';
+  infoAreaMessage.style.padding = '10px 15px';
+  infoAreaMessage.style.borderRadius = '8px';
+  infoAreaMessage.style.marginBottom = '20px';
+  infoAreaMessage.style.border = '1px solid #c3d69b';
+  infoAreaMessage.style.fontSize = '0.9rem';
+  infoAreaMessage.innerHTML = '<strong><i class="bx bx-info-circle"></i> Rekomendasi:</strong> Area 1 sangat disarankan untuk rombongan 2-3 tenda atau 6-12 orang.';
+  
+  const nightCountEl = document.getElementById('night-count');
+  if (nightCountEl) nightCountEl.parentNode.insertBefore(infoAreaMessage, nightCountEl);
 
   const paketInputs = document.querySelectorAll('.paket-qty');
   const addonInputs = document.querySelectorAll('.addon-qty');
@@ -61,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const input = container.querySelector('.qty-input');
     
     btnMinus.addEventListener('click', () => {
+      if (input.disabled) return;
       let val = parseInt(input.value) || 0;
       if (val > 0) {
         input.value = val - 1;
@@ -69,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     btnPlus.addEventListener('click', () => {
+      if (input.disabled) return;
       let val = parseInt(input.value) || 0;
       input.value = val + 1;
       input.dispatchEvent(new Event('change'));
@@ -154,7 +171,96 @@ document.addEventListener('DOMContentLoaded', () => {
     return true;
   }
 
+  function validateAreaRules() {
+    const area = areaCampInput.value;
+    const ci = new Date(checkinInput.value);
+    const co = new Date(checkoutInput.value);
+    
+    let isWeekend = false;
+    if (ci && co && !isNaN(ci) && !isNaN(co)) {
+      let current = new Date(ci);
+      while(current < co) {
+         const day = current.getDay();
+         if (day === 0 || day === 5 || day === 6) { // Sun, Fri, Sat
+             isWeekend = true;
+             break;
+         }
+         current.setDate(current.getDate() + 1);
+      }
+    }
+
+    let ruleAlerts = [];
+
+    // Reset all disabled states first
+    paketInputs.forEach(input => input.disabled = false);
+
+    // Rule 1: Weekend Campervan/Area 8 KHUSUS Bawa Tenda Sendiri
+    if (isWeekend && (area === 'Campervan' || area === 'Area 8')) {
+        let hasSewa = false;
+        paketInputs.forEach(input => {
+            if (input.dataset.val !== 'tenda_sendiri') {
+                if (parseInt(input.value) > 0) {
+                    hasSewa = true;
+                    input.value = 0;
+                }
+                input.disabled = true; 
+            }
+        });
+        if (hasSewa) {
+            ruleAlerts.push(`Saat weekend/libur, ${area} KHUSUS untuk "Bawa Tenda Sendiri". Paket sewa Anda telah di-reset.`);
+        }
+    }
+
+    // Rule 2: Paket 4P ONLY in Area 1, 3, 4, 5, 8, Campervan
+    const allowed4pAreas = ['Area 1', 'Area 3', 'Area 4', 'Area 5', 'Area 8', 'Campervan'];
+    if (area && !allowed4pAreas.includes(area)) {
+        let has4p = false;
+        paketInputs.forEach(input => {
+            if (input.dataset.capacity === '4') {
+                if (parseInt(input.value) > 0) {
+                    has4p = true;
+                    input.value = 0;
+                }
+                input.disabled = true;
+            }
+        });
+        if (has4p) {
+            ruleAlerts.push(`Paket berkapasitas 4 Orang tidak diizinkan di ${area}. Paket 4P Anda telah di-reset.`);
+        }
+    }
+
+    if (ruleAlerts.length > 0) {
+        alert(ruleAlerts.join('\n\n'));
+    }
+
+    // UI Dimming Rule for Area 2, 3, 4, 6
+    const dimAreas = ['Area 2', 'Area 3', 'Area 4', 'Area 6'];
+    const packageGroups = document.querySelectorAll('.package-group');
+    if (area && dimAreas.includes(area)) {
+        if (packageGroups[2]) packageGroups[2].classList.add('less-visible');
+        if (packageGroups[3]) packageGroups[3].classList.add('less-visible');
+    } else {
+        if (packageGroups[2]) packageGroups[2].classList.remove('less-visible');
+        if (packageGroups[3]) packageGroups[3].classList.remove('less-visible');
+    }
+
+    // Info Message for Area 1 & 2P Recommended Areas
+    const recommended2pAreas = ['Area 2', 'Area 5', 'Area 6', 'Area 7'];
+    
+    if (area === 'Area 1') {
+        infoAreaMessage.innerHTML = '<strong><i class="bx bx-info-circle"></i> Rekomendasi:</strong> Area 1 sangat disarankan untuk rombongan 2-3 tenda atau 6-12 orang.';
+        infoAreaMessage.style.display = 'block';
+    } else if (area && recommended2pAreas.includes(area)) {
+        infoAreaMessage.innerHTML = '<strong><i class="bx bx-info-circle"></i> Rekomendasi:</strong> Area ini sangat cocok dan direkomendasikan untuk paket tenda berkapasitas 2 orang.';
+        infoAreaMessage.style.display = 'block';
+    } else {
+        infoAreaMessage.style.display = 'none';
+    }
+  }
+
   function updateSummary() {
+    validateAreaRules();
+
     let html = '';
     let total = 0;
     
@@ -267,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  const inputs = [checkinInput, checkoutInput, jmlDewasaInput, jmlAnakInput, ...paketInputs, ...addonInputs];
+  const inputs = [areaCampInput, checkinInput, checkoutInput, jmlDewasaInput, jmlAnakInput, ...paketInputs, ...addonInputs];
   inputs.forEach(input => {
     input.addEventListener('change', updateSummary);
     input.addEventListener('input', updateSummary);

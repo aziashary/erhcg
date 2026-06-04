@@ -1839,8 +1839,12 @@ Perlu data final:
 
 ## 26.4 Area dan Capacity Final
 
-Perlu dikunci lanjutan:
+Aturan terkait Area dan Paket telah ditetapkan sebagai berikut:
 
-* Stok area aktif harian.
-* Apakah total area 28 tenda tetap ditampilkan atau dibatasi 22 tenda secara operasional.
-* Apakah ada area yang hanya dibuka saat kondisi tertentu.
+* **Kapasitas Tenda per Area**: Area 0 (1), Area 1 (3), Area 2 (5), Campervan (3), Area 3 (5), Area 4 (3), Area 4 Samping (1), Area 5 (2), Area 6 (2), Area 7 (2), Area 8 (3).
+* **Rekomendasi Area & Paket**: 
+  * Area 2, 3, 4, 6 mengutamakan (rekomendasi) Paket Konten dan Paket Lengkap. Paket Fullset dan Bawa Tenda Sendiri dibuat kurang menonjol (less visible).
+  * Paket kapasitas 2 orang direkomendasikan di Area 2, 5, 6, 7 (walau boleh di semua area).
+  * Area 1 sangat disarankan untuk kelompok dengan 2-3 tenda atau rombongan 6-12 orang.
+* **Pembatasan Paket 4 Orang**: Paket berkapasitas 4 orang HANYA diizinkan di Area 1, 3, 4, 5, 8, dan Campervan.
+* **Pembatasan Area Khusus**: Area Campervan dan Area 8 diprioritaskan KHUSUS untuk "Bawa Tenda Sendiri" pada saat weekend/hari libur. Pada saat weekday, bawa tenda sendiri bebas di semua area.

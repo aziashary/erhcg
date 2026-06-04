@@ -118,8 +118,48 @@
 
     .radio-content strong {
       font-size: 1.1rem;
-      display: block;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
       margin-bottom: 5px;
+    }
+
+    .badge-recommended {
+      background-color: var(--color-forest-green);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+    }
+
+    .badge-bestseller {
+      background-color: var(--color-primary-brown);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+    }
+
+    .btn-info-icon {
+      background: none;
+      border: none;
+      color: var(--color-primary-brown);
+      cursor: pointer;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .less-visible {
+      opacity: 0.4;
+      filter: grayscale(80%);
+      transition: opacity 0.3s ease, filter 0.3s ease;
+    }
+    
+    .less-visible:hover, .less-visible:focus-within {
+      opacity: 1;
+      filter: grayscale(0%);
     }
 
     .addon-list {
@@ -244,7 +284,7 @@
           <div class="form-group">
             <label for="jml_anak">Jumlah Anak-anak</label>
             <input type="number" id="jml_anak" class="form-control" min="0" value="0">
-            <small style="color: #666; font-size: 0.8rem;">Di bawah 5 tahun gratis HTM</small>
+            <small style="color: #666; font-size: 0.8rem;">Anak di bawah 5 tahun</small>
           </div>
         </div>
         <div class="form-row">
@@ -285,10 +325,12 @@
             </label>
             <select id="area_camp" class="form-control" required>
               <option value="" disabled selected>Pilih Area Camp</option>
+              <option value="Area 0">Area 0</option>
               <option value="Area 1">Area 1</option>
               <option value="Area 2">Area 2</option>
               <option value="Area 3">Area 3</option>
               <option value="Area 4">Area 4</option>
+              <option value="Area 4 Samping">Area 4 Samping</option>
               <option value="Area 5">Area 5</option>
               <option value="Area 6">Area 6</option>
               <option value="Area 7">Area 7</option>
@@ -320,11 +362,8 @@
             <div class="radio-card"
               style="flex-direction: row; justify-content: space-between; align-items: center; border: none; border-bottom: 1px solid #eee; border-radius: 0; padding: 15px;">
               <div class="radio-content">
-                <strong>Paket Lengkap 4P <span
-                    style="background-color: var(--color-forest-green); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 5px;">Recommended</span>
-                  <button type="button" class="btn-info" data-paket="lengkap_4p"
-                    style="background: none; border: none; color: var(--color-primary-brown); cursor: pointer; padding: 0; margin-left: 5px;"
-                    title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
+                <strong>Paket Lengkap 4P <span class="badge-recommended">Recommended</span>
+                  <button type="button" class="btn-info btn-info-icon" data-paket="lengkap_4p" title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
                 <span>Rp 680.000</span><br>
                 <small>Termasuk HTM 4 org</small>
               </div>
@@ -340,11 +379,8 @@
             <div class="radio-card"
               style="flex-direction: row; justify-content: space-between; align-items: center; border: none; border-radius: 0; padding: 15px;">
               <div class="radio-content">
-                <strong>Paket Lengkap 2P <span
-                    style="background-color: var(--color-forest-green); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 5px;">Recommended</span>
-                  <button type="button" class="btn-info" data-paket="lengkap_2p"
-                    style="background: none; border: none; color: var(--color-primary-brown); cursor: pointer; padding: 0; margin-left: 5px;"
-                    title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
+                <strong>Paket Lengkap 2P <span class="badge-recommended">Recommended</span>
+                  <button type="button" class="btn-info btn-info-icon" data-paket="lengkap_2p" title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
                 <span>Rp 560.000</span><br>
                 <small>Termasuk HTM 2 org</small>
               </div>
@@ -364,11 +400,8 @@
             <div class="radio-card"
               style="flex-direction: row; justify-content: space-between; align-items: center; border: none; border-bottom: 1px solid #eee; border-radius: 0; padding: 15px;">
               <div class="radio-content">
-                <strong>Paket Konten 4P <span
-                    style="background-color: var(--color-primary-brown); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 5px;">Best
-                    Seller</span> <button type="button" class="btn-info" data-paket="konten_4p"
-                    style="background: none; border: none; color: var(--color-primary-brown); cursor: pointer; padding: 0; margin-left: 5px;"
-                    title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
+                <strong>Paket Konten 4P <span class="badge-bestseller">Best Seller</span>
+                  <button type="button" class="btn-info btn-info-icon" data-paket="konten_4p" title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
                 <span>Rp 340.000</span><br>
                 <small>Belum termasuk HTM</small>
               </div>
@@ -383,11 +416,8 @@
             <div class="radio-card"
               style="flex-direction: row; justify-content: space-between; align-items: center; border: none; border-radius: 0; padding: 15px;">
               <div class="radio-content">
-                <strong>Paket Konten 2P <span
-                    style="background-color: var(--color-primary-brown); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 5px;">Best
-                    Seller</span> <button type="button" class="btn-info" data-paket="konten_2p"
-                    style="background: none; border: none; color: var(--color-primary-brown); cursor: pointer; padding: 0; margin-left: 5px;"
-                    title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
+                <strong>Paket Konten 2P <span class="badge-bestseller">Best Seller</span>
+                  <button type="button" class="btn-info btn-info-icon" data-paket="konten_2p" title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
                 <span>Rp 290.000</span><br>
                 <small>Belum termasuk HTM</small>
               </div>
@@ -406,9 +436,7 @@
             <div class="radio-card"
               style="flex-direction: row; justify-content: space-between; align-items: center; border: none; border-bottom: 1px solid #eee; border-radius: 0; padding: 15px;">
               <div class="radio-content">
-                <strong>Paket Fullset 4P <button type="button" class="btn-info" data-paket="fullset_4p"
-                    style="background: none; border: none; color: var(--color-primary-brown); cursor: pointer; padding: 0; margin-left: 5px;"
-                    title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
+                <strong>Paket Fullset 4P <button type="button" class="btn-info btn-info-icon" data-paket="fullset_4p" title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
                 <span>Rp 240.000</span><br>
                 <small>Belum termasuk HTM</small>
               </div>
@@ -423,9 +451,7 @@
             <div class="radio-card"
               style="flex-direction: row; justify-content: space-between; align-items: center; border: none; border-radius: 0; padding: 15px;">
               <div class="radio-content">
-                <strong>Paket Fullset 2P <button type="button" class="btn-info" data-paket="fullset_2p"
-                    style="background: none; border: none; color: var(--color-primary-brown); cursor: pointer; padding: 0; margin-left: 5px;"
-                    title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
+                <strong>Paket Fullset 2P <button type="button" class="btn-info btn-info-icon" data-paket="fullset_2p" title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
                 <span>Rp 190.000</span><br>
                 <small>Belum termasuk HTM</small>
               </div>
@@ -653,7 +679,7 @@
       document.getElementById('submit-btn').disabled = false;
     }
   </script>
-    <script type="module" src="/main.js"></script>
-  </body>
+  <script type="module" src="/main.js"></script>
+</body>
 
 </html>
