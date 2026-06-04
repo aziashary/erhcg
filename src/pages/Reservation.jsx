@@ -337,8 +337,8 @@ export default function Reservation() {
     .then(res => res.json())
     .then(data => {
       setIsSubmitting(false);
-      if (data.success) {
-        const invoiceId = data.data.id;
+      if (data.invoice_id) {
+        const invoiceId = data.invoice_id;
         
         let message = `Halo Admin Rockshill Campground! Saya ingin melakukan reservasi dengan detail berikut:\n\n*Invoice:* ${invoiceId}\n\n`;
         message += `*Data Pemesan*\nNama: ${formData.nama}\nWhatsApp: ${formData.wa}\n`;
@@ -351,7 +351,7 @@ export default function Reservation() {
         alert(`Reservasi berhasil dibuat!\n\nNomor Invoice Anda: ${invoiceId}\n\nMohon simpan nomor invoice ini untuk mengecek status. Anda akan diarahkan ke WhatsApp untuk konfirmasi admin.`);
         window.location.href = `https://wa.me/6281234567890?text=${encodeURIComponent(message)}`;
       } else {
-        alert('Gagal membuat reservasi: ' + (data.message || 'Error server'));
+        alert('Gagal membuat reservasi: ' + (data.error || 'Error server'));
       }
     })
     .catch(err => {
