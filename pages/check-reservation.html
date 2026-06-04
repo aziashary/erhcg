@@ -2,7 +2,7 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cek Reservasi | Rockshill Campground</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -48,10 +48,28 @@
       
       .invoice-card {
         background: white;
-        border-radius: 12px;
         padding: 30px;
         box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-        border: 1px solid #eee;
+        position: relative;
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+      .invoice-card::before, .invoice-card::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 10px;
+        background: linear-gradient(-45deg, white 7px, transparent 0), linear-gradient(45deg, white 7px, transparent 0);
+        background-size: 14px 14px;
+        background-repeat: repeat-x;
+      }
+      .invoice-card::before {
+        top: -10px;
+      }
+      .invoice-card::after {
+        bottom: -10px;
+        transform: rotate(180deg);
       }
       .invoice-header {
         display: flex;
@@ -155,7 +173,7 @@
     <!-- Header -->
   <header id="header">
     <div class="container header-inner">
-      <div class="logo">Rockshill.</div>
+      <a href="/" class="logo" style="display: flex; align-items: center; gap: 10px; text-decoration: none;"><img src="/logo.png" alt="Rockshill Logo" style="height: 35px; width: auto;" /> <span>Rockshill.</span></a>
       <nav class="nav-links">
         <a href="/#intro">Tentang</a>
         <a href="/#offerings">Fasilitas</a>
@@ -211,23 +229,25 @@
                 <p id="res-nights" style="font-size: 0.95rem; color: #666; margin-top: 5px;">-</p>
               </div>
               <div class="info-group">
-                <h4>Peserta</h4>
+                <h4>Peserta & Kedatangan</h4>
                 <p id="res-pax">-</p>
+                <p id="res-jam" style="font-size: 0.95rem; color: #666; margin-top: 5px;">-</p>
               </div>
               <div class="info-group">
-                <h4>Tanggal Dibuat</h4>
-                <p id="res-created">-</p>
+                <h4>Area & Tgl Dibuat</h4>
+                <p id="res-area" style="font-weight:bold; color:var(--color-primary-brown);">-</p>
+                <p id="res-created" style="font-size: 0.95rem; color: #666; margin-top: 5px;">-</p>
               </div>
             </div>
 
             <div class="invoice-details">
               <div class="detail-section">
                 <h4>Paket Tenda</h4>
-                <pre id="res-paket" style="font-family: inherit; font-size: 1rem; color: #444; margin: 0; white-space: pre-wrap;"></pre>
+                <div id="res-paket" style="font-size: 1rem; color: #444; margin: 0;"></div>
               </div>
               <div class="detail-section">
                 <h4>Alat Tambahan</h4>
-                <pre id="res-addons" style="font-family: inherit; font-size: 1rem; color: #444; margin: 0; white-space: pre-wrap;"></pre>
+                <div id="res-addons" style="font-size: 1rem; color: #444; margin: 0;"></div>
               </div>
             </div>
 

@@ -147,8 +147,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
+  function formatTanggalIndo(dateStr) {
+    if (!dateStr) return '-';
+    const date = new Date(dateStr);
+    const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    
+    const d = date.getDate().toString().padStart(2, '0');
+    const m = bulan[date.getMonth()];
+    const y = date.getFullYear().toString().slice(-2);
+    const h = hari[date.getDay()];
+    
+    return `${h}, ${d}-${m}-${y}`;
+  }
+
   function openModal(res) {
     const createdStr = res.dateCreated ? new Date(res.dateCreated).toLocaleString('id-ID') : '-';
+    
+    const checkinFormatted = formatTanggalIndo(res.checkin);
+    const checkoutFormatted = formatTanggalIndo(res.checkout);
     
     modalBody.innerHTML = `
       <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:15px;">
@@ -171,25 +188,56 @@ document.addEventListener('DOMContentLoaded', () => {
           Peserta: ${res.dewasa} Dewasa, ${res.anak} Anak
         </div>
         <div>
-          <strong>Jadwal</strong><br>
-          Check-in: ${res.checkin}<br>
-          Check-out: ${res.checkout}<br>
-          Malam: ${res.nights}<br>
+          <strong>Jadwal & Lokasi</strong><br>
+          Jadwal: ${checkinFormatted} s.d ${checkoutFormatted} (${res.nights} mlm)<br>
+          Area Camp: ${res.area || '-'}<br>
+          Jam Kedatangan: ${res.jamKedatangan || '-'}<br>
           Tgl Submit: ${createdStr}
         </div>
       </div>
       
       <div style="margin-bottom:15px;">
         <strong>Paket Tenda:</strong>
-        <pre style="background:#f9f9f9; padding:10px; border-radius:6px; font-family:inherit; margin-top:5px; white-space:pre-wrap;">${res.paketText || '-'}</pre>
+        <div id="modal-res-paket" style="background:#f9f9f9; padding:10px; border-radius:6px; font-family:inherit; margin-top:5px; font-size: 1rem; color: #444;"></div>
       </div>
       
       <div>
         <strong>Alat Tambahan:</strong>
-        <pre style="background:#f9f9f9; padding:10px; border-radius:6px; font-family:inherit; margin-top:5px; white-space:pre-wrap;">${res.addonsText || '-'}</pre>
+        <div id="modal-res-addons" style="background:#f9f9f9; padding:10px; border-radius:6px; font-family:inherit; margin-top:5px; font-size: 1rem; color: #444;"></div>
       </div>
     `;
     modal.style.display = 'flex';
+    
+    function renderTextAsFlex(text, containerId) {
+      const container = document.getElementById(containerId);
+      if (!text || text.trim() === '-' || text.includes('Tidak ada')) {
+        container.innerHTML = text || '-';
+        return;
+      }
+      
+      const lines = text.split('\n');
+      let html = '';
+      for(let i=0; i<lines.length; i++) {
+        let line = lines[i];
+        if (line.startsWith('- ')) {
+           const match = line.match(/^- (.+?)\s+(\d+x)$/);
+           if (match) {
+             html += `<div style="display:flex; justify-content:space-between; margin-bottom: 2px;">
+                        <span>- ${match[1].trim()}</span>
+                        <span>${match[2]}</span>
+                      </div>`;
+           } else {
+             html += `<div>${line}</div>`;
+           }
+        } else if (line.trim().length > 0) {
+           html += `<div style="color:#666; margin-bottom: 8px; margin-left: 12px;">${line.trim()}</div>`;
+        }
+      }
+      container.innerHTML = html;
+    }
+
+    renderTextAsFlex(res.paketText, 'modal-res-paket');
+    renderTextAsFlex(res.addonsText, 'modal-res-addons');
   }
   
   btnCloseModal.addEventListener('click', () => {

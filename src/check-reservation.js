@@ -49,6 +49,20 @@ document.addEventListener('DOMContentLoaded', () => {
     notFound.style.display = 'block';
   }
 
+  function formatTanggalIndo(dateStr) {
+    if (!dateStr) return '-';
+    const date = new Date(dateStr);
+    const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    
+    const d = date.getDate().toString().padStart(2, '0');
+    const m = bulan[date.getMonth()];
+    const y = date.getFullYear().toString().slice(-2);
+    const h = hari[date.getDay()];
+    
+    return `${h}, ${d}-${m}-${y}`;
+  }
+
   function showResult(res) {
     notFound.style.display = 'none';
     resultContainer.style.display = 'block';
@@ -61,8 +75,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (res.email) contact += ` | Email: ${res.email}`;
     document.getElementById('res-contact').textContent = contact;
 
-    document.getElementById('res-dates').textContent = `${res.checkin} s.d ${res.checkout}`;
+    const checkinFormatted = formatTanggalIndo(res.checkin);
+    const checkoutFormatted = formatTanggalIndo(res.checkout);
+
+    document.getElementById('res-dates').innerHTML = `${checkinFormatted} s.d<br>${checkoutFormatted}`;
     document.getElementById('res-nights').textContent = `${res.nights} Malam`;
+    
+    document.getElementById('res-area').textContent = res.area ? res.area : '-';
+    document.getElementById('res-jam').textContent = res.jamKedatangan ? res.jamKedatangan : '-';
     
     let pax = `${res.dewasa} Dewasa`;
     if (res.anak && parseInt(res.anak) > 0) pax += `, ${res.anak} Anak`;
@@ -73,8 +93,37 @@ document.addEventListener('DOMContentLoaded', () => {
       day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
     });
 
-    document.getElementById('res-paket').textContent = res.paketText || '-';
-    document.getElementById('res-addons').textContent = res.addonsText || '-';
+    function renderTextAsFlex(text, containerId) {
+      const container = document.getElementById(containerId);
+      if (!text || text.trim() === '-' || text.includes('Tidak ada')) {
+        container.innerHTML = text || '-';
+        return;
+      }
+      
+      const lines = text.split('\n');
+      let html = '';
+      for(let i=0; i<lines.length; i++) {
+        let line = lines[i];
+        if (line.startsWith('- ')) {
+           const match = line.match(/^- (.+?)\s+(\d+x)$/);
+           if (match) {
+             html += `<div style="display:flex; justify-content:space-between; margin-bottom: 2px;">
+                        <span>- ${match[1].trim()}</span>
+                        <span>${match[2]}</span>
+                      </div>`;
+           } else {
+             html += `<div>${line}</div>`;
+           }
+        } else if (line.trim().length > 0) {
+           html += `<div style="color:#666; margin-bottom: 8px; margin-left: 12px;">${line.trim()}</div>`;
+        }
+      }
+      container.innerHTML = html;
+    }
+
+    renderTextAsFlex(res.paketText, 'res-paket');
+    renderTextAsFlex(res.addonsText, 'res-addons');
+
     document.getElementById('res-total').textContent = res.total;
 
     // WA Link

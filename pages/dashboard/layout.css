@@ -58,7 +58,7 @@ body {
 .sidebar-logo {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-primary-brown);
+  color: var(--color-white);
   text-decoration: none;
 }
 .sidebar-logo span {

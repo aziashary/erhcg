@@ -120,6 +120,78 @@ document.addEventListener('DOMContentLoaded', () => {
   checkoutInput.valueAsDate = tomorrow;
   checkoutInput.min = tomorrow.toISOString().split('T')[0];
 
+  const CACHE_KEY = 'erhcg_reservation_cache';
+  const CACHE_EXPIRY = 60 * 60 * 1000; // 1 jam
+
+  function saveToCache() {
+    const data = {
+      timestamp: Date.now(),
+      nama: document.getElementById('nama').value,
+      wa: document.getElementById('wa').value,
+      email: document.getElementById('email').value,
+      jml_dewasa: jmlDewasaInput.value,
+      jml_anak: jmlAnakInput.value,
+      jml_motor: document.getElementById('jml_motor').value,
+      jml_mobil: document.getElementById('jml_mobil').value,
+      checkin: checkinInput.value,
+      checkout: checkoutInput.value,
+      jam_kedatangan: document.getElementById('jam_kedatangan').value,
+      area_camp: areaCampInput.value,
+      paketQty: Array.from(paketInputs).map(i => i.value),
+      addonQty: Array.from(addonInputs).map(i => i.value),
+      flysheetRemoved: flysheetRemoved
+    };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+  }
+
+  function restoreFromCache() {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try {
+        const data = JSON.parse(cached);
+        if (Date.now() - data.timestamp < CACHE_EXPIRY) {
+          document.getElementById('nama').value = data.nama || '';
+          document.getElementById('wa').value = data.wa || '';
+          document.getElementById('email').value = data.email || '';
+          jmlDewasaInput.value = data.jml_dewasa || 2;
+          jmlAnakInput.value = data.jml_anak || 0;
+          document.getElementById('jml_motor').value = data.jml_motor || '';
+          document.getElementById('jml_mobil').value = data.jml_mobil || '';
+          
+          const todayStr = today.toISOString().split('T')[0];
+          if (data.checkin && data.checkin >= todayStr) {
+             checkinInput.value = data.checkin;
+          }
+          if (data.checkout && data.checkout > todayStr) {
+             checkoutInput.value = data.checkout;
+          }
+          
+          document.getElementById('jam_kedatangan').value = data.jam_kedatangan || '';
+          areaCampInput.value = data.area_camp || '';
+          
+          if (data.paketQty) {
+            paketInputs.forEach((input, idx) => {
+              input.value = data.paketQty[idx] || 0;
+            });
+          }
+          if (data.addonQty) {
+            addonInputs.forEach((input, idx) => {
+              input.value = data.addonQty[idx] || 0;
+            });
+          }
+          
+          flysheetRemoved = !!data.flysheetRemoved;
+        } else {
+          localStorage.removeItem(CACHE_KEY);
+        }
+      } catch (e) {
+        localStorage.removeItem(CACHE_KEY);
+      }
+    }
+  }
+  
+  restoreFromCache();
+
   function formatRupiah(angka) {
     return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   }
@@ -371,9 +443,21 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.disabled = true;
       }
     }
+    saveToCache();
   }
 
-  const inputs = [areaCampInput, checkinInput, checkoutInput, jmlDewasaInput, jmlAnakInput, ...paketInputs, ...addonInputs];
+  const namaInput = document.getElementById('nama');
+  const waInput = document.getElementById('wa');
+  const emailInput = document.getElementById('email');
+  const jmlMotorInput = document.getElementById('jml_motor');
+  const jmlMobilInput = document.getElementById('jml_mobil');
+  const jamKedatanganInput = document.getElementById('jam_kedatangan');
+
+  const inputs = [
+    namaInput, waInput, emailInput, jmlMotorInput, jmlMobilInput, jamKedatanganInput,
+    areaCampInput, checkinInput, checkoutInput, jmlDewasaInput, jmlAnakInput, 
+    ...paketInputs, ...addonInputs
+  ];
   inputs.forEach(input => {
     input.addEventListener('change', updateSummary);
     input.addEventListener('input', updateSummary);
@@ -412,7 +496,17 @@ document.addEventListener('DOMContentLoaded', () => {
     paketInputs.forEach(input => {
       const qty = parseInt(input.value) || 0;
       if (qty > 0) {
-        paketText += `- ${qty}x ${input.dataset.name}\n`;
+        const name = input.dataset.name;
+        const price = parseInt(input.dataset.price);
+        
+        let itemTotalStr = '';
+        if (price > 0) {
+          const totalItem = price * nights * qty;
+          itemTotalStr = `\n   ${formatRupiah(totalItem).replace('Rp ', '')}`;
+        }
+
+        paketText += `- ${name.padEnd(23, ' ')} ${qty}x${itemTotalStr}\n`;
+        
         const val = input.dataset.val;
         if (val === 'konten_4p' || val === 'fullset_4p' || val === 'konten_2p' || val === 'fullset_2p') {
           hasKontenOrFullset = true;
@@ -425,19 +519,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let addonsText = '';
     if (hasKontenOrFullset && !flysheetRemoved) {
-      addonsText += `- ${sumKontenFullset}x Flysheet\n`;
+      const flysheetPrice = 35000;
+      const totalFlysheet = flysheetPrice * nights * sumKontenFullset;
+      addonsText += `- ${'Flysheet'.padEnd(23, ' ')} ${sumKontenFullset}x\n   ${formatRupiah(totalFlysheet).replace('Rp ', '')}\n`;
     }
 
     addonInputs.forEach(input => {
       const qty = parseInt(input.value) || 0;
       if (qty > 0) {
-        addonsText += `- ${qty}x ${input.dataset.name}\n`;
+        const name = input.dataset.name;
+        const price = parseInt(input.dataset.price);
+        const type = input.dataset.type;
+        
+        let itemTotal = price * qty;
+        if (type !== 'flat') itemTotal = itemTotal * nights;
+        
+        let itemTotalStr = `\n   ${formatRupiah(itemTotal).replace('Rp ', '')}`;
+        addonsText += `- ${name.padEnd(23, ' ')} ${qty}x${itemTotalStr}\n`;
       }
     });
 
     if(addonsText === '') addonsText = '- Tidak ada\n';
 
     const total = totalPriceEl.textContent;
+
+    function formatTanggalIndo(dateStr) {
+      const date = new Date(dateStr);
+      const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      
+      const d = date.getDate().toString().padStart(2, '0');
+      const m = bulan[date.getMonth()];
+      const y = date.getFullYear().toString().slice(-2);
+      const h = hari[date.getDay()];
+      
+      return `${h}, ${d}-${m}-${y}`;
+    }
+
+    const checkinFormatted = formatTanggalIndo(checkin);
+    const checkoutFormatted = formatTanggalIndo(checkout);
 
     let message = `Halo Admin Rockshill Campground! Saya ingin melakukan reservasi dengan detail berikut:\n\n`;
     message += `*Data Pemesan*\n`;
@@ -449,8 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
     message += `Peserta: ${dewasa} Dewasa, ${anak} Anak\n`;
     message += `Kendaraan: ${jmlMotor} Motor, ${jmlMobil} Mobil\n\n`;
     message += `*Jadwal & Lokasi*\n`;
-    message += `Check-in: ${checkin}\n`;
-    message += `Check-out: ${checkout} (${nights} Malam)\n`;
+    message += `Jadwal: ${checkinFormatted} s.d ${checkoutFormatted} (${nights} Malam)\n`;
     message += `Jam Kedatangan: ${jamKedatangan}\n`;
     message += `Area Camp: ${areaCamp}\n\n`;
     message += `*Pilihan Paket*\n`;
@@ -501,6 +620,9 @@ document.addEventListener('DOMContentLoaded', () => {
       submitBtn.disabled = false;
 
       if (data.success) {
+        // Hapus cache form setelah submit berhasil
+        localStorage.removeItem('erhcg_reservation_cache');
+
         const invoiceId = data.data.id;
         
         message = `Halo Admin Rockshill Campground! Saya ingin melakukan reservasi dengan detail berikut:\n\n*Invoice:* ${invoiceId}\n\n` + message.replace(`Halo Admin Rockshill Campground! Saya ingin melakukan reservasi dengan detail berikut:\n\n`, '');

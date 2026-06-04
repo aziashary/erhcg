@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link rel="icon" type="image/png" href="/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Form Reservasi | Rockshill Campground</title>
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -156,8 +156,9 @@
       filter: grayscale(80%);
       transition: opacity 0.3s ease, filter 0.3s ease;
     }
-    
-    .less-visible:hover, .less-visible:focus-within {
+
+    .less-visible:hover,
+    .less-visible:focus-within {
       opacity: 1;
       filter: grayscale(0%);
     }
@@ -234,7 +235,7 @@
   <!-- Header -->
   <header id="header">
     <div class="container header-inner">
-      <div class="logo">Rockshill.</div>
+      <a href="/" class="logo" style="display: flex; align-items: center; gap: 10px; text-decoration: none;"><img src="/logo.png" alt="Rockshill Logo" style="height: 35px; width: auto;" /> <span>Rockshill.</span></a>
       <nav class="nav-links">
         <a href="/#intro">Tentang</a>
         <a href="/#offerings">Fasilitas</a>
@@ -318,7 +319,7 @@
           <div class="form-group">
             <label for="area_camp">
               Area Camp *
-              <a href="/pages/area.html" target="_blank"
+              <a href="/pages/area.html"
                 style="margin-left: 10px; font-size: 0.85rem; color: var(--color-primary-brown); text-decoration: none; font-weight: bold;">
                 <i class='bx bx-info-circle'></i> Info Area
               </a>
@@ -363,7 +364,8 @@
               style="flex-direction: row; justify-content: space-between; align-items: center; border: none; border-bottom: 1px solid #eee; border-radius: 0; padding: 15px;">
               <div class="radio-content">
                 <strong>Paket Lengkap 4P <span class="badge-recommended">Recommended</span>
-                  <button type="button" class="btn-info btn-info-icon" data-paket="lengkap_4p" title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
+                  <button type="button" class="btn-info btn-info-icon" data-paket="lengkap_4p" title="Lihat detail"><i
+                      class='bx bx-info-circle'></i></button></strong>
                 <span>Rp 680.000</span><br>
                 <small>Termasuk HTM 4 org</small>
               </div>
@@ -380,7 +382,8 @@
               style="flex-direction: row; justify-content: space-between; align-items: center; border: none; border-radius: 0; padding: 15px;">
               <div class="radio-content">
                 <strong>Paket Lengkap 2P <span class="badge-recommended">Recommended</span>
-                  <button type="button" class="btn-info btn-info-icon" data-paket="lengkap_2p" title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
+                  <button type="button" class="btn-info btn-info-icon" data-paket="lengkap_2p" title="Lihat detail"><i
+                      class='bx bx-info-circle'></i></button></strong>
                 <span>Rp 560.000</span><br>
                 <small>Termasuk HTM 2 org</small>
               </div>
@@ -401,7 +404,8 @@
               style="flex-direction: row; justify-content: space-between; align-items: center; border: none; border-bottom: 1px solid #eee; border-radius: 0; padding: 15px;">
               <div class="radio-content">
                 <strong>Paket Konten 4P <span class="badge-bestseller">Best Seller</span>
-                  <button type="button" class="btn-info btn-info-icon" data-paket="konten_4p" title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
+                  <button type="button" class="btn-info btn-info-icon" data-paket="konten_4p" title="Lihat detail"><i
+                      class='bx bx-info-circle'></i></button></strong>
                 <span>Rp 340.000</span><br>
                 <small>Belum termasuk HTM</small>
               </div>
@@ -417,7 +421,8 @@
               style="flex-direction: row; justify-content: space-between; align-items: center; border: none; border-radius: 0; padding: 15px;">
               <div class="radio-content">
                 <strong>Paket Konten 2P <span class="badge-bestseller">Best Seller</span>
-                  <button type="button" class="btn-info btn-info-icon" data-paket="konten_2p" title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
+                  <button type="button" class="btn-info btn-info-icon" data-paket="konten_2p" title="Lihat detail"><i
+                      class='bx bx-info-circle'></i></button></strong>
                 <span>Rp 290.000</span><br>
                 <small>Belum termasuk HTM</small>
               </div>
@@ -436,7 +441,8 @@
             <div class="radio-card"
               style="flex-direction: row; justify-content: space-between; align-items: center; border: none; border-bottom: 1px solid #eee; border-radius: 0; padding: 15px;">
               <div class="radio-content">
-                <strong>Paket Fullset 4P <button type="button" class="btn-info btn-info-icon" data-paket="fullset_4p" title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
+                <strong>Paket Fullset 4P <button type="button" class="btn-info btn-info-icon" data-paket="fullset_4p"
+                    title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
                 <span>Rp 240.000</span><br>
                 <small>Belum termasuk HTM</small>
               </div>
@@ -451,7 +457,8 @@
             <div class="radio-card"
               style="flex-direction: row; justify-content: space-between; align-items: center; border: none; border-radius: 0; padding: 15px;">
               <div class="radio-content">
-                <strong>Paket Fullset 2P <button type="button" class="btn-info btn-info-icon" data-paket="fullset_2p" title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
+                <strong>Paket Fullset 2P <button type="button" class="btn-info btn-info-icon" data-paket="fullset_2p"
+                    title="Lihat detail"><i class='bx bx-info-circle'></i></button></strong>
                 <span>Rp 190.000</span><br>
                 <small>Belum termasuk HTM</small>
               </div>
