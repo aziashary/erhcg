@@ -10,7 +10,8 @@ CREATE TABLE users (
 -- Tabel Reservations
 CREATE TABLE reservations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    invoice_id TEXT UNIQUE NOT NULL,
+    invoice_id TEXT UNIQUE,
+    booking_code TEXT UNIQUE NOT NULL,
     customer_name TEXT NOT NULL,
     customer_wa TEXT NOT NULL,
     customer_email TEXT,

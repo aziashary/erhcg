@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 
 function formatTanggalIndo(dateStr) {
   if (!dateStr) return '-';
@@ -15,12 +15,21 @@ function formatTanggalIndo(dateStr) {
   return `${h}, ${d}-${m}-${y}`;
 }
 
+function formatRupiah(angka) {
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+}
+
 export default function CheckReservation() {
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get('id') || '');
   const [result, setResult] = useState(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showCopyToast, setShowCopyToast] = useState(false);
+
+  const numericTotal = result ? parseInt(result.total?.replace(/[^0-9]/g, '') || '0', 10) : 0;
+  const dpAmount = numericTotal / 2;
+  const fullAmount = numericTotal;
 
   useEffect(() => {
     if (searchParams.get('id')) {
@@ -86,7 +95,7 @@ export default function CheckReservation() {
       <div className="page-header">
         <div className="container">
           <h1>Cek Status Reservasi</h1>
-          <p>Masukkan Nomor Invoice Anda untuk melihat rincian pemesanan.</p>
+          <p>Masukkan Nomor Invoice atau Kode Booking Anda untuk melihat rincian pemesanan.</p>
         </div>
       </div>
 
@@ -99,7 +108,7 @@ export default function CheckReservation() {
               value={query} 
               onChange={e => setQuery(e.target.value)} 
               className="search-input" 
-              placeholder="Contoh: INV-ROCK-1234" 
+              placeholder="Contoh: RHCG-260610-00145 atau RCBO-12345" 
               required 
             />
             <button type="submit" className="btn btn-primary search-btn" disabled={loading}>
@@ -110,20 +119,50 @@ export default function CheckReservation() {
           {error && (
             <div className="not-found" style={{ display: 'block' }}>
               <i className='bx bx-error-circle' style={{ fontSize: '3rem', marginBottom: '10px' }}></i>
-              <h3>Invoice Tidak Ditemukan</h3>
-              <p>Pastikan Anda memasukkan nomor invoice yang benar atau gunakan perangkat yang sama saat melakukan reservasi.</p>
+              <h3>Reservasi Tidak Ditemukan</h3>
+              <p>Pastikan Anda memasukkan nomor invoice atau kode booking yang benar.</p>
             </div>
           )}
 
           {result && (
             <div className="result-container" style={{ display: 'block' }}>
               <div className="invoice-card">
-                <div className="invoice-header">
-                  <div>
-                    <span style={{ color: '#777', fontSize: '0.9rem' }}>Nomor Invoice</span>
-                    <div className="invoice-id">{result.id}</div>
+                {result.status === 'Expired' ? (
+                  <div className="unpaid-banner" style={{ background: 'rgba(100, 100, 100, 0.05)', borderLeft: '4px solid #666' }}>
+                    <i className="bx bx-time-five" style={{ fontSize: '1.4rem', color: '#666' }}></i>
+                    <div>
+                      <strong style={{ color: '#666' }}>Pemesanan Kadaluarsa (Expired)</strong>
+                      <p>Batas waktu pembayaran 1 jam telah habis. Kode booking ini sudah tidak dapat digunakan untuk pembayaran. Silakan lakukan reservasi ulang.</p>
+                    </div>
                   </div>
-                  <div className="invoice-status">{result.status || 'Menunggu Konfirmasi'}</div>
+                ) : result.status !== 'Confirmed' && (
+                  <div className="unpaid-banner">
+                    <i className="bx bx-error-circle" style={{ fontSize: '1.4rem' }}></i>
+                    <div>
+                      <strong>Belum Dibayar / Menunggu Konfirmasi</strong>
+                      <p>Silakan lakukan pembayaran lalu hubungi Admin via WhatsApp dengan menyertakan Kode Booking Anda untuk konfirmasi.</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="invoice-header">
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+                    {result.id && (
+                      <div>
+                        <span style={{ color: '#777', fontSize: '0.85rem' }}>Nomor Invoice</span>
+                        <div className="invoice-id" style={{ fontSize: '1.3rem' }}>{result.id}</div>
+                      </div>
+                    )}
+                    {result.booking_code && (
+                      <div>
+                        <span style={{ color: '#777', fontSize: '0.85rem' }}>Kode Booking</span>
+                        <div className="invoice-id" style={{ fontSize: '1.3rem', color: 'var(--color-primary-brown)' }}>{result.booking_code}</div>
+                      </div>
+                    )}
+                  </div>
+                  <div className={`invoice-status ${result.status === 'Confirmed' ? 'status-confirmed' : result.status === 'Expired' || result.status === 'Declined' ? 'status-expired' : 'status-unpaid'}`}>
+                    {result.status === 'Confirmed' ? 'Confirmed' : result.status === 'Expired' ? 'Expired' : result.status === 'Declined' ? 'Declined' : 'Belum Dibayar'}
+                  </div>
                 </div>
 
                 <div className="invoice-grid">
@@ -176,25 +215,77 @@ export default function CheckReservation() {
                   <span>Estimasi Total</span>
                   <h3>{result.total}</h3>
                 </div>
+
+                {result.status !== 'Confirmed' && result.status !== 'Expired' && result.status !== 'Declined' && (
+                  <div className="payment-transfer-info">
+                    <h4>
+                      <i className='bx bx-credit-card-front' style={{ color: 'var(--color-primary-brown)', fontSize: '1.2rem' }}></i> Rekening Pembayaran
+                    </h4>
+                    <div className="rekening-box">
+                      <div>
+                        <div className="bank-label">Bank BCA</div>
+                        <div className="norek">7361558573</div>
+                        <div className="an">A.n. Mochamad Azi Ashary</div>
+                      </div>
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText('7361558573');
+                          setShowCopyToast(true);
+                          setTimeout(() => setShowCopyToast(false), 2000);
+                        }}
+                        className="copy-btn"
+                        type="button"
+                      >
+                        <i className='bx bx-copy'></i> Salin
+                      </button>
+                    </div>
+
+                    <div className="payment-split-grid">
+                      <div className="payment-split-card dp">
+                        <span className="split-label">Minimal DP 50%</span>
+                        <strong className="split-val">{formatRupiah(dpAmount)}</strong>
+                      </div>
+                      <div className="payment-split-card full">
+                        <span className="split-label">Pelunasan (Full Payment)</span>
+                        <strong className="split-val">{formatRupiah(fullAmount)}</strong>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 
-                <div style={{ marginTop: '20px', textAlign: 'center' }}>
-                  <p style={{ fontSize: '0.85rem', color: '#888' }}>*Tunjukkan halaman ini atau nomor invoice ke admin via WhatsApp untuk konfirmasi pembayaran.</p>
-                  <a 
-                    href={`https://wa.me/6281234567890?text=${encodeURIComponent(`Halo Admin, saya ingin konfirmasi pembayaran untuk reservasi dengan Nomor Invoice: *${result.id}*`)}`} 
-                    target="_blank" 
-                    className="btn btn-outline" 
-                    rel="noreferrer"
-                    style={{ marginTop: '15px', borderColor: '#25D366', color: '#25D366' }}
-                  >
-                    <i className='bx bxl-whatsapp'></i> Hubungi Admin
-                  </a>
-                </div>
+                {result.status !== 'Expired' && result.status !== 'Declined' ? (
+                  <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                    <p style={{ fontSize: '0.85rem', color: '#888' }}>*Tunjukan Kode Booking/ No Invoice ke admin Whatsapp untuk pertanyaan dan konfirmasi seputar reservasi</p>
+                    <a 
+                      href={`https://wa.me/6281234567890?text=${encodeURIComponent(`Halo Admin, saya ingin konfirmasi pembayaran untuk reservasi dengan Kode Booking: *${result.booking_code || '-'}*` + (result.id ? ` / Invoice: *${result.id}*` : ''))}`} 
+                      target="_blank" 
+                      className="btn btn-outline" 
+                      rel="noreferrer"
+                      style={{ marginTop: '15px', borderColor: '#25D366', color: '#25D366' }}
+                    >
+                       <i className='bx bxl-whatsapp'></i> Hubungi Admin
+                    </a>
+                  </div>
+                ) : (
+                  <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                    <p style={{ fontSize: '0.9rem', color: '#888', marginBottom: '15px' }}>Reservasi ini telah kadaluarsa. Silakan lakukan pemesanan ulang.</p>
+                    <Link to="/reservation" className="btn btn-primary" style={{ display: 'inline-block' }}>
+                      Buat Reservasi Baru
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
         </div>
       </section>
+
+      {showCopyToast && (
+        <div className="toast-notification">
+          <i className='bx bx-check-circle' style={{ color: '#4caf50', fontSize: '1.2rem' }}></i> Salin di Clipboard
+        </div>
+      )}
     </main>
   );
 }

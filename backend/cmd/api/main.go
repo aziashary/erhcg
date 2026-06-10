@@ -9,6 +9,7 @@ import (
 	handler "github.com/aziashary/erhcg/backend/internal/delivery/http"
 	"github.com/aziashary/erhcg/backend/internal/delivery/middleware"
 	"github.com/aziashary/erhcg/backend/internal/models"
+	"github.com/aziashary/erhcg/backend/internal/utils"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -23,10 +24,14 @@ func main() {
 	config.ConnectDatabase()
 
 	// Auto Migrate Tables
+	config.DB.Migrator().DropTable(&models.Reservation{})
 	err := config.DB.AutoMigrate(&models.User{}, &models.Reservation{})
 	if err != nil {
 		log.Fatal("Failed to migrate database: ", err)
 	}
+
+	// Start Reservation Background Scheduler
+	utils.StartReservationScheduler(config.DB)
 
 	r := gin.Default()
 
@@ -47,19 +52,21 @@ func main() {
 	api := r.Group("/api")
 	{
 		// Auth
-		api.POST("/admin/login", handler.LoginAdmin)
+		api.POST("/hq-rockshill/login", handler.LoginAdmin)
 
 		// Reservations (Dilindungi Rate Limiter: max 5 requests per second, burst 10)
 		api.POST("/reservations", middleware.RateLimit(rate.Limit(5), 10), handler.SubmitReservation)
 		api.GET("/reservations/:invoiceId", handler.CheckReservation)
 
 		// Admin Protected Routes
-		admin := api.Group("/admin")
+		admin := api.Group("/hq-rockshill")
 		admin.Use(middleware.RequireAuth())
 		{
 			admin.GET("/dashboard", func(c *gin.Context) {
 				c.JSON(200, gin.H{"message": "Welcome to protected admin dashboard"})
 			})
+			admin.GET("/reservations", handler.GetAllReservations)
+			admin.PUT("/reservations/:id/status", handler.UpdateReservationStatus)
 		}
 	}
 

@@ -28,7 +28,7 @@ export default function Packages() {
                   <span className="badge-text">Recommended</span>
                 </div>
                 <h3 className="package-title">Paket Lengkap (4 Orang)</h3>
-                <div className="package-price">Rp 680.000<span>/malam</span></div>
+                <div className="package-price" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}><span style={{ textDecoration: 'line-through', textDecorationColor: 'red', color: 'rgba(255, 255, 255, 0.8)', fontWeight: 'normal', fontSize: '0.6em', lineHeight: '1' }}>Rp 820.000</span><div style={{ lineHeight: '1' }}><strong style={{ fontWeight: '900' }}>Rp 680.000</strong><span style={{ fontSize: '0.7em', fontWeight: 'normal' }}>/malam</span></div></div>
               </div>
               <div className="package-body">
                 <ul className="package-list">
@@ -44,7 +44,7 @@ export default function Packages() {
             <div className="package-card">
               <div className="package-header" style={{ backgroundColor: 'var(--color-forest-green)' }}>
                 <h3 className="package-title">Paket Lengkap (2 Orang)</h3>
-                <div className="package-price">Rp 560.000<span>/malam</span></div>
+                <div className="package-price" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}><span style={{ textDecoration: 'line-through', textDecorationColor: 'red', color: 'rgba(255, 255, 255, 0.8)', fontWeight: 'normal', fontSize: '0.6em', lineHeight: '1' }}>Rp 700.000</span><div style={{ lineHeight: '1' }}><strong style={{ fontWeight: '900' }}>Rp 560.000</strong><span style={{ fontSize: '0.7em', fontWeight: 'normal' }}>/malam</span></div></div>
               </div>
               <div className="package-body">
                 <ul className="package-list">
@@ -67,7 +67,7 @@ export default function Packages() {
                   <span className="badge-text">Best Seller</span>
                 </div>
                 <h3 className="package-title">Paket Konten (4 Orang)</h3>
-                <div className="package-price">Rp 340.000<span>/malam</span></div>
+                <div className="package-price" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}><span style={{ textDecoration: 'line-through', textDecorationColor: 'red', color: 'rgba(255, 255, 255, 0.8)', fontWeight: 'normal', fontSize: '0.6em', lineHeight: '1' }}>Rp 360.000</span><div style={{ lineHeight: '1' }}><strong style={{ fontWeight: '900' }}>Rp 340.000</strong><span style={{ fontSize: '0.7em', fontWeight: 'normal' }}>/malam</span></div></div>
               </div>
               <div className="package-body">
                 <ul className="package-list">
@@ -83,7 +83,7 @@ export default function Packages() {
             <div className="package-card">
               <div className="package-header" style={{ backgroundColor: 'var(--color-primary-brown)' }}>
                 <h3 className="package-title">Paket Konten (2 Orang)</h3>
-                <div className="package-price">Rp 290.000<span>/malam</span></div>
+                <div className="package-price" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}><span style={{ textDecoration: 'line-through', textDecorationColor: 'red', color: 'rgba(255, 255, 255, 0.8)', fontWeight: 'normal', fontSize: '0.6em', lineHeight: '1' }}>Rp 310.000</span><div style={{ lineHeight: '1' }}><strong style={{ fontWeight: '900' }}>Rp 290.000</strong><span style={{ fontSize: '0.7em', fontWeight: 'normal' }}>/malam</span></div></div>
               </div>
               <div className="package-body">
                 <ul className="package-list">

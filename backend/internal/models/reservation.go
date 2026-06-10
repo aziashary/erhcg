@@ -8,7 +8,8 @@ import (
 
 type Reservation struct {
 	ID            string         `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	InvoiceID     string         `gorm:"type:text;unique;not null"`
+	InvoiceID     *string        `gorm:"type:text;unique"`
+	BookingCode   string         `gorm:"type:text;unique;not null"`
 	CustomerName  string         `gorm:"type:text;not null"`
 	CustomerWA    string         `gorm:"type:text;not null"`
 	CustomerEmail string         `gorm:"type:text"`

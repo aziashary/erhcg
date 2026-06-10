@@ -92,7 +92,11 @@ export default function Home() {
                   <span className="badge-text">Best<br />Seller</span>
                 </div>
                 <h3 className="package-title">Paket Konten</h3>
-                <div className="package-price" style={{ fontSize: '1.5rem' }}>Mulai dari Rp 290.000<span>/malam</span></div>
+                <div className="package-price" style={{ fontSize: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>Mulai dari</span>
+                  <span style={{ textDecoration: 'line-through', textDecorationColor: 'red', color: 'rgba(255, 255, 255, 0.8)', fontWeight: 'normal', fontSize: '0.6em', lineHeight: '1' }}>Rp 310.000</span>
+                  <div style={{ lineHeight: '1' }}><strong style={{ fontWeight: '900' }}>Rp 290.000</strong><span style={{ fontSize: '0.7em', fontWeight: 'normal' }}>/malam</span></div>
+                </div>
               </div>
               <div className="package-body">
                 <p style={{ marginBottom: '15px', fontSize: '0.9rem', color: 'var(--color-warm-gray)' }}>Paket favorit untuk camping yang lebih nyaman dan konten-ready.</p>
@@ -105,11 +109,11 @@ export default function Home() {
                 <div style={{ backgroundColor: 'var(--color-broken-white)', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                     <strong>Kapasitas 2 Orang:</strong>
-                    <span style={{ color: 'var(--color-primary-brown)', fontWeight: 'bold' }}>Rp 290.000</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: '1.2' }}><span style={{ textDecoration: 'line-through', textDecorationColor: 'red', color: '#999', fontWeight: 'normal', fontSize: '0.75em' }}>Rp 310.000</span><span style={{ color: 'var(--color-primary-brown)', fontWeight: '900' }}>Rp 290.000</span></div>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <strong>Kapasitas 4 Orang:</strong>
-                    <span style={{ color: 'var(--color-primary-brown)', fontWeight: 'bold' }}>Rp 340.000</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: '1.2' }}><span style={{ textDecoration: 'line-through', textDecorationColor: 'red', color: '#999', fontWeight: 'normal', fontSize: '0.75em' }}>Rp 360.000</span><span style={{ color: 'var(--color-primary-brown)', fontWeight: '900' }}>Rp 340.000</span></div>
                   </div>
                 </div>
                 <p style={{ fontSize: '0.8rem', color: '#d9534f', fontWeight: 'bold' }}>*Belum termasuk HTM & flysheet</p>
@@ -129,7 +133,11 @@ export default function Home() {
                   <span className="badge-text">Recom-<br />mended</span>
                 </div>
                 <h3 className="package-title">Paket Lengkap</h3>
-                <div className="package-price" style={{ fontSize: '1.5rem' }}>Mulai dari Rp 560.000<span>/malam</span></div>
+                <div className="package-price" style={{ fontSize: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>Mulai dari</span>
+                  <span style={{ textDecoration: 'line-through', textDecorationColor: 'red', color: 'rgba(255, 255, 255, 0.8)', fontWeight: 'normal', fontSize: '0.6em', lineHeight: '1' }}>Rp 700.000</span>
+                  <div style={{ lineHeight: '1' }}><strong style={{ fontWeight: '900' }}>Rp 560.000</strong><span style={{ fontSize: '0.7em', fontWeight: 'normal' }}>/malam</span></div>
+                </div>
               </div>
               <div className="package-body">
                 <p style={{ marginBottom: '15px', fontSize: '0.9rem', color: 'var(--color-warm-gray)' }}>Paket paling praktis, datang dan camping tanpa ribet.</p>
@@ -143,11 +151,11 @@ export default function Home() {
                 <div style={{ backgroundColor: 'var(--color-broken-white)', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                     <strong>Kapasitas 2 Orang:</strong>
-                    <span style={{ color: 'var(--color-forest-green)', fontWeight: 'bold' }}>Rp 560.000</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: '1.2' }}><span style={{ textDecoration: 'line-through', textDecorationColor: 'red', color: '#999', fontWeight: 'normal', fontSize: '0.75em' }}>Rp 700.000</span><span style={{ color: 'var(--color-forest-green)', fontWeight: '900' }}>Rp 560.000</span></div>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <strong>Kapasitas 4 Orang:</strong>
-                    <span style={{ color: 'var(--color-forest-green)', fontWeight: 'bold' }}>Rp 680.000</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: '1.2' }}><span style={{ textDecoration: 'line-through', textDecorationColor: 'red', color: '#999', fontWeight: 'normal', fontSize: '0.75em' }}>Rp 820.000</span><span style={{ color: 'var(--color-forest-green)', fontWeight: '900' }}>Rp 680.000</span></div>
                   </div>
                 </div>
               </div>

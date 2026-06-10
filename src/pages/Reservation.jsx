@@ -69,6 +69,8 @@ export default function Reservation() {
   const [activeInfoPaket, setActiveInfoPaket] = useState(null);
   const [turnstileToken, setTurnstileToken] = useState('dummy_token'); // Mock turnstile for React
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successData, setSuccessData] = useState(null);
+  const [showCopyToast, setShowCopyToast] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -196,6 +198,8 @@ export default function Reservation() {
     let hasKontenOrFullset = false;
     let sumKontenFullset = 0;
 
+    const nightSuffix = nights > 1 ? ` (${nights})` : '';
+
     packageDefs.forEach(p => {
       const qty = packages[p.id];
       if (qty > 0) {
@@ -210,9 +214,9 @@ export default function Reservation() {
         if (p.price > 0) {
           const totalItem = p.price * nights * qty;
           total += totalItem;
-          htmlLines.push({ label: `${qty}x ${p.name} (${nights} mlm)`, val: totalItem });
+          htmlLines.push({ id: p.id, type: 'package', label: `${qty}x ${p.name}${nightSuffix}`, val: totalItem, removable: true });
         } else if (p.id === 'tenda_sendiri') {
-          htmlLines.push({ label: `${qty}x ${p.name}`, val: 0, text: '-' });
+          htmlLines.push({ id: p.id, type: 'package', label: `${qty}x ${p.name}`, val: 0, text: '-', removable: true });
         }
       }
     });
@@ -225,22 +229,22 @@ export default function Reservation() {
     if (peopleAt35k > 0) {
       const t = peopleAt35k * 35000;
       total += t;
-      htmlLines.push({ label: `HTM Tenda Sewa (${peopleAt35k} org)`, val: t });
+      htmlLines.push({ label: `${peopleAt35k}x Htm Paket`, val: t });
     }
 
     if (peopleAt45k > 0) {
       const t = peopleAt45k * 45000;
       total += t;
-      htmlLines.push({ label: `HTM Tenda Sendiri (${peopleAt45k} org)`, val: t });
+      htmlLines.push({ label: `${peopleAt45k}x Htm Tenda Sendiri`, val: t });
     }
 
     if (hasKontenOrFullset && !flysheetRemoved) {
       const t = 35000 * nights * sumKontenFullset;
       total += t;
       htmlLines.push({ 
-        label: `${sumKontenFullset}x Flysheet (${nights} mlm)`, 
+        label: `${sumKontenFullset}x Flysheet${nightSuffix}`, 
         val: t,
-        removable: true
+        removable: false
       });
     }
 
@@ -249,12 +253,11 @@ export default function Reservation() {
       if (qty > 0) {
         let t = a.price * qty;
         let suffix = '';
-        if (a.type !== 'flat') {
-          t *= nights;
-          suffix = ` (${nights} mlm)`;
+        if (a.type !== 'flat' && nights > 1) {
+          suffix = ` (${nights})`;
         }
         total += t;
-        htmlLines.push({ label: `${qty}x ${a.name}${suffix}`, val: t });
+        htmlLines.push({ id: a.id, type: 'addon', label: `${qty}x ${a.name}${suffix}`, val: t, removable: true });
       }
     });
 
@@ -337,19 +340,25 @@ export default function Reservation() {
     .then(res => res.json())
     .then(data => {
       setIsSubmitting(false);
-      if (data.invoice_id) {
-        const invoiceId = data.invoice_id;
+      if (data.booking_code) {
+        const invoiceId = data.invoice_id; // will be null/undefined
+        const bookingCode = data.booking_code;
         
-        let message = `Halo Admin Rockshill Campground! Saya ingin melakukan reservasi dengan detail berikut:\n\n*Invoice:* ${invoiceId}\n\n`;
+        let message = `Halo Admin Rockshill Campground! Saya ingin konfirmasi pembayaran reservasi dengan detail:\n\n*Kode Booking:* ${bookingCode}\n\n`;
         message += `*Data Pemesan*\nNama: ${formData.nama}\nWhatsApp: ${formData.wa}\n`;
         if (formData.email) message += `Email: ${formData.email}\n`;
         message += `Peserta: ${formData.jml_dewasa} Dewasa, ${formData.jml_anak} Anak\nKendaraan: ${formData.jml_motor} Motor, ${formData.jml_mobil} Mobil\n\n`;
         message += `*Jadwal & Lokasi*\nJadwal: ${formatTanggalIndo(formData.checkin)} s.d ${formatTanggalIndo(formData.checkout)} (${nights} Malam)\n`;
         message += `Jam Kedatangan: ${formData.jam_kedatangan}\nArea Camp: ${formData.area_camp}\n\n`;
-        message += `*Pilihan Paket*\n${paketText}\n*Alat Tambahan*\n${addonsText}\n*Estimasi Total: ${formatRupiah(summary.total)}*\n\nApakah tanggal tersebut tersedia? Terima kasih!`;
+        message += `*Pilihan Paket*\n${paketText}\n*Alat Tambahan*\n${addonsText}\n*Estimasi Total: ${formatRupiah(summary.total)}*\n\nTerlampir bukti transfer saya. Terima kasih!`;
 
-        alert(`Reservasi berhasil dibuat!\n\nNomor Invoice Anda: ${invoiceId}\n\nMohon simpan nomor invoice ini untuk mengecek status. Anda akan diarahkan ke WhatsApp untuk konfirmasi admin.`);
-        window.location.href = `https://wa.me/6281234567890?text=${encodeURIComponent(message)}`;
+        setSuccessData({
+          invoiceId,
+          bookingCode,
+          total: summary.total,
+          message: message
+        });
+        window.scrollTo(0,0);
       } else {
         alert('Gagal membuat reservasi: ' + (data.error || 'Error server'));
       }
@@ -368,6 +377,93 @@ export default function Reservation() {
       }
     }
   };
+
+  if (successData) {
+    return (
+      <main className="page-transition">
+        <div className="page-header">
+          <div className="container">
+            <h1>Reservasi Berhasil</h1>
+            <p>Selesaikan pembayaran Anda dalam waktu 1 jam ke depan.</p>
+          </div>
+        </div>
+        <div className="container section-padding">
+          <div className="form-container" style={{ textAlign: 'left', maxWidth: '800px', margin: '0 auto' }}>
+            <div style={{ backgroundColor: '#e2f0d9', color: '#2e5c1e', padding: '20px', borderRadius: '8px', marginBottom: '30px', border: '1px solid #c3d69b' }}>
+              <h2 style={{ margin: '0 0 10px 0', fontSize: '1.5rem' }}>Kode Booking: <strong>{successData.bookingCode}</strong></h2>
+              <p style={{ margin: 0, fontSize: '0.9rem' }}>Batas Waktu Pembayaran: <strong>1 Jam setelah booking</strong> (Jika lewat, booking hangus dan harus isi form ulang)</p>
+            </div>
+
+            <h3 className="section-title">Informasi Pembayaran</h3>
+            <p>Silakan lakukan pembayaran melalui transfer bank ke rekening berikut:</p>
+            <div className="rekening-box" style={{ marginBottom: '30px' }}>
+              <div>
+                <div className="bank-label">Bank BCA</div>
+                <div className="norek">7361558573</div>
+                <div className="an">A.n. Mochamad Azi Ashary</div>
+              </div>
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText('7361558573');
+                  setShowCopyToast(true);
+                  setTimeout(() => setShowCopyToast(false), 2000);
+                }}
+                className="copy-btn"
+                type="button"
+              >
+                <i className='bx bx-copy'></i> Salin
+              </button>
+            </div>
+
+            <h3 className="section-title">Pilihan Pembayaran</h3>
+            <div className="form-row" style={{ marginBottom: '30px', display: 'flex', gap: '15px' }}>
+              <div style={{ flex: 1, backgroundColor: '#fff3cd', border: '1px solid #ffeeba', padding: '20px', borderRadius: '8px' }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#856404', fontSize: '1.1rem' }}>Down Payment (DP 50%)</h4>
+                <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#856404', margin: 0 }}>{formatRupiah(successData.total / 2)}</p>
+              </div>
+              <div style={{ flex: 1, backgroundColor: '#d4edda', border: '1px solid #c3e6cb', padding: '20px', borderRadius: '8px' }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#155724', fontSize: '1.1rem' }}>Pembayaran Lunas (Full)</h4>
+                <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#155724', margin: 0 }}>{formatRupiah(successData.total)}</p>
+              </div>
+            </div>
+
+            <h3 className="section-title">Syarat & Ketentuan</h3>
+            <div style={{ backgroundColor: '#f9f9f9', padding: '20px', borderRadius: '8px', border: '1px solid #ddd', marginBottom: '30px', fontSize: '0.9rem', lineHeight: '1.6' }}>
+              <h4 style={{ margin: '0 0 10px 0', color: 'var(--color-primary-brown)' }}>Syarat Perubahan Tanggal Kedatangan/Reservasi</h4>
+              <ol style={{ paddingLeft: '20px', marginBottom: '20px' }}>
+                <li>Pengunjung dapat merubah tanggal kedatangan maksimal 3 hari sebelum waktu kedatangan. Lewat dari waktu tersebut tidak bisa melakukan ubah tanggal.</li>
+                <li>Perubahan tanggal hanya berlaku 1x dalam jangka waktu 30 hari kedepan.</li>
+                <li>Uang muka tidak bisa dikembalikan dengan alasan apapun.</li>
+              </ol>
+
+              <h4 style={{ margin: '0 0 10px 0', color: 'var(--color-primary-brown)' }}>Perhatian Saat Camping</h4>
+              <ol style={{ paddingLeft: '20px', margin: 0 }}>
+                <li>Setiap tamu bertanggung jawab terhadap kebersihan dan perlengkapan tenda. Jika ada perlengkapan yang hilang, rusak, atau noda yang tidak hilang maka tamu wajib melapor dan mengganti produk tersebut.</li>
+                <li>Setiap tamu bertanggung jawab terhadap barang pribadi & barang berharga miliknya.</li>
+                <li>Landscape kami memiliki banyak area yang curam, aktivitas anak-anak wajib diawasi oleh orang tua.</li>
+                <li>Tidak diperkenankan merokok dan membawa/mengonsumsi makanan berbau menyengat di dalam tenda kami.</li>
+                <li>Harap menutup pintu tenda ketika keluar maupun ketika hujan.</li>
+                <li>Tidak diperkenankan membawa narkoba atau obat-obatan maupun senyawa terlarang sesuai hukum yang berlaku di Indonesia.</li>
+                <li>Gunakan listrik/lampu dengan bijak untuk menghemat daya.</li>
+                <li>Mohon untuk tidak membuat kegaduhan misalnya memasang volume lagu terlalu kencang yang dapat mengganggu kenyamanan campers lain.</li>
+                <li>Yang terakhir, jagalah alam, jangan merugikan hewan dan pohon kita!</li>
+              </ol>
+            </div>
+
+            <p style={{ textAlign: 'center', marginBottom: '15px', color: '#555' }}>Silakan transfer dan kirimkan bukti pembayaran melalui tombol di bawah ini:</p>
+            <a href={`https://wa.me/6281234567890?text=${encodeURIComponent(successData.message)}`} target="_blank" rel="noopener noreferrer" className="btn btn-primary bounce-anim" style={{ display: 'block', textAlign: 'center', fontSize: '1.1rem', padding: '15px', borderRadius: '30px' }}>
+              Konfirmasi ke WhatsApp Admin <i className='bx bxl-whatsapp'></i>
+            </a>
+          </div>
+        </div>
+        {showCopyToast && (
+          <div className="toast-notification">
+            <i className='bx bx-check-circle' style={{ color: '#4caf50', fontSize: '1.2rem' }}></i> Salin di Clipboard
+          </div>
+        )}
+      </main>
+    );
+  }
 
   return (
     <main className="page-transition">
@@ -584,7 +680,22 @@ export default function Reservation() {
                   <div key={idx} className="summary-row">
                     <span>
                       {line.label}
-                      {line.removable && <button type="button" onClick={removeFlysheet} style={{background:'none', border:'none', color:'red', cursor:'pointer'}} title="Hapus Flysheet"><i className='bx bx-trash'></i></button>}
+                      {line.removable && (
+                        <button 
+                          type="button" 
+                          onClick={() => {
+                            if (line.type === 'package') {
+                              handlePackageChange(line.id, -packages[line.id]);
+                            } else if (line.type === 'addon') {
+                              handleAddonChange(line.id, -addons[line.id]);
+                            }
+                          }}
+                          style={{background:'none', border:'none', color:'red', cursor:'pointer', marginLeft: '5px'}} 
+                          title="Hapus Item"
+                        >
+                          <i className='bx bx-trash'></i>
+                        </button>
+                      )}
                     </span>
                     <span>{line.text || formatRupiah(line.val)}</span>
                   </div>
@@ -594,7 +705,8 @@ export default function Reservation() {
                 <span>Total Estimasi:</span>
                 <span>{formatRupiah(summary.total)}</span>
               </div>
-              <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '10px' }}>*Estimasi ini belum termasuk penyesuaian khusus jika ada.</p>
+              {nights > 1 && <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '10px', marginBottom: 0 }}>*Angka di dalam kurung menunjukkan jumlah malam.</p>}
+              <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '5px' }}>*Estimasi ini belum termasuk penyesuaian khusus jika ada.</p>
             </div>
 
             <button type="submit" className="btn btn-primary submit-btn" disabled={isSubmitDisabled}>
