@@ -336,7 +336,7 @@ export default function Reservation() {
       total: formatRupiah(summary.total)
     };
 
-    fetch('http://localhost:8000/api/reservations', {
+    fetch('/api/reservations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify(payload)

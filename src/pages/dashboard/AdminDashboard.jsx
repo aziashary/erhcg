@@ -4,21 +4,46 @@ import { Link } from 'react-router-dom';
 const TODAY = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({ total: 0, pending: 0, confirmed: 0 });
+  const [stats, setStats] = useState({ total: 0, pending: 0, confirmedWeek: 0, confirmedMonth: 0 });
   const [recent, setRecent] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/hq-rockshill/reservations', {
+    fetch('/api/hq-rockshill/reservations', {
       headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
     })
       .then(r => r.json())
       .then(res => {
         const d = res.data || [];
+        const now = new Date();
+        
+        // Start of week (Sunday)
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+        
+        // Start of month
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        let cWeek = 0;
+        let cMonth = 0;
+
+        d.filter(r => r.status === 'Confirmed').forEach(r => {
+          const dateStr = r.created_at || r.created || r.checkin;
+          if (dateStr) {
+            const dt = new Date(dateStr);
+            if (dt >= startOfWeek) cWeek++;
+            if (dt >= startOfMonth) cMonth++;
+          } else {
+             cMonth++; // Fallback
+          }
+        });
+
         setStats({
-          total: d.length,
+          total: d.filter(r => r.status === 'Confirmed').length,
           pending: d.filter(r => r.status === 'Menunggu Konfirmasi').length,
-          confirmed: d.filter(r => r.status === 'Confirmed').length,
+          confirmedWeek: cWeek,
+          confirmedMonth: cMonth,
         });
         setRecent(d.slice(0, 5));
         setLoading(false);
@@ -31,12 +56,21 @@ export default function AdminDashboard() {
       ? <span className="chip chip-g"><i className="bx bx-check-circle"></i> Terkonfirmasi</span>
       : <span className="chip chip-b">Menunggu</span>;
 
-  if (loading) return <div className="empty">Memuat data dashboard...</div>;
+  if (loading) return (
+    <div style={{ padding: '20px 0' }}>
+      <div className="skeleton skeleton-title"></div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
+        <div className="skeleton skeleton-card" style={{ height: '80px' }}></div>
+        <div className="skeleton skeleton-card" style={{ height: '80px' }}></div>
+      </div>
+      <div className="skeleton skeleton-card"></div>
+    </div>
+  );
 
   return (
     <>
       {/* ─── PAGE HEADER ─── */}
-      <div className="pg-hdr">
+      <div className="pg-hdr desk">
         <div>
           <h1>Summary Dashboard</h1>
           <p>Ringkasan Data Reservasi</p>
@@ -69,36 +103,46 @@ export default function AdminDashboard() {
       )}
 
       {/* ─── STATS ─── */}
-      <div className="stats">
-        <div className="stat">
+      <div className="stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '14px', marginBottom: '24px' }}>
+        <div className="stat" style={{ margin: 0 }}>
           <div className="stat-top">
             <div className="stat-ico"><i className="bx bxs-book-content"></i></div>
-            <span className="stat-badge g">+4.2%</span>
+            <span className="stat-badge g">Semua</span>
           </div>
           <div className="stat-lbl">Total Reservasi</div>
           <div className="stat-val">{stats.total.toLocaleString('id-ID')}</div>
         </div>
 
-        <div className="stat">
+        <div className="stat" style={{ margin: 0 }}>
           <div className="stat-top">
             <div className="stat-ico" style={{ background: 'var(--err-ctr)', color: 'var(--err)' }}>
               <i className="bx bx-error-circle"></i>
             </div>
-            <span className="stat-badge r">Urgen</span>
           </div>
-          <div className="stat-lbl">Menunggu Konfirmasi</div>
+          <div className="stat-lbl">Belum Payment</div>
           <div className="stat-val" style={stats.pending ? { color: 'var(--err)' } : undefined}>{stats.pending}</div>
         </div>
 
-        <div className="stat">
+        <div className="stat" style={{ margin: 0 }}>
           <div className="stat-top">
             <div className="stat-ico" style={{ background: 'var(--sec-ctr)', color: 'var(--sec)' }}>
               <i className="bx bx-check-shield"></i>
             </div>
-            <span className="stat-badge m">Bulan Ini</span>
+            <span className="stat-badge m">Minggu Ini</span>
           </div>
           <div className="stat-lbl">Terkonfirmasi</div>
-          <div className="stat-val" style={{ color: 'var(--sec)' }}>{stats.confirmed}</div>
+          <div className="stat-val" style={{ color: 'var(--sec)' }}>{stats.confirmedWeek}</div>
+        </div>
+
+        <div className="stat" style={{ margin: 0 }}>
+          <div className="stat-top">
+            <div className="stat-ico" style={{ background: '#e0f2fe', color: '#0284c7' }}>
+              <i className="bx bx-calendar-check"></i>
+            </div>
+            <span className="stat-badge" style={{ background: '#e0f2fe', color: '#0284c7', fontSize: 10, padding: '3px 8px', borderRadius: 20, fontWeight: 600 }}>Bulan Ini</span>
+          </div>
+          <div className="stat-lbl">Terkonfirmasi</div>
+          <div className="stat-val" style={{ color: '#0284c7' }}>{stats.confirmedMonth}</div>
         </div>
       </div>
 

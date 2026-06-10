@@ -48,7 +48,7 @@ export default function CheckReservation() {
     setResult(null);
     setError(false);
     try {
-      const response = await fetch(`http://localhost:8000/api/reservations/${q}`);
+      const response = await fetch(`/api/reservations/${q}`);
       if (!response.ok) throw new Error('Not found');
       const data = await response.json();
       if (data.success) {
@@ -116,7 +116,17 @@ export default function CheckReservation() {
             </button>
           </form>
 
-          {error && (
+          {loading && (
+            <div className="result-container" style={{ display: 'block', padding: '24px', background: '#fff', borderRadius: '12px', border: '1px solid #eaeaea', marginTop: '20px' }}>
+              <div className="skeleton skeleton-title"></div>
+              <div className="skeleton skeleton-card" style={{ height: '160px' }}></div>
+              <div className="skeleton skeleton-text" style={{ width: '85%' }}></div>
+              <div className="skeleton skeleton-text" style={{ width: '60%' }}></div>
+              <div className="skeleton skeleton-text" style={{ width: '75%' }}></div>
+            </div>
+          )}
+
+          {error && (!loading) && (
             <div className="not-found" style={{ display: 'block' }}>
               <i className='bx bx-error-circle' style={{ fontSize: '3rem', marginBottom: '10px' }}></i>
               <h3>Reservasi Tidak Ditemukan</h3>

@@ -32,7 +32,7 @@ export default function AdminPrices() {
 
   return (
     <>
-      <div className="pg-hdr">
+      <div className="pg-hdr desk">
         <div>
           <h1>Daftar Harga Master</h1>
           <p>Kelola harga sewa tenda, paket makan, dan perlengkapan tambahan secara terpusat.</p>
@@ -40,6 +40,12 @@ export default function AdminPrices() {
         <div className="pg-hdr-right">
           <button className="btn btn-pri"><i className="bx bx-plus"></i> Tambah Item Baru</button>
         </div>
+      </div>
+
+      {/* Mobile title */}
+      <div className="mob" style={{ flexDirection: 'column', marginBottom: 14 }}>
+        <h1 style={{ fontFamily: 'Outfit', fontSize: 24, fontWeight: 700 }}>Daftar Harga</h1>
+        <p style={{ fontSize: 13, color: 'var(--on-dim)' }}>Kelola harga item</p>
       </div>
 
       {/* ── DESKTOP TABLE ── */}
@@ -85,11 +91,7 @@ export default function AdminPrices() {
           <i className="bx bx-search"></i>
           <input placeholder="Cari layanan atau fasilitas..." value={q} onChange={e => setQ(e.target.value)} />
         </div>
-        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 6, marginBottom: 12 }}>
-          {CATS.map(c => (
-            <button key={c} className={`ftab ${cat === c ? 'on' : ''}`} onClick={() => setCat(c)} style={{ flexShrink: 0 }}>{c}</button>
-          ))}
-        </div>
+
         {list.map(i => (
           <div key={i.id} className="pc-mob">
             <div className="pc-mob-top">
@@ -109,7 +111,7 @@ export default function AdminPrices() {
         ))}
       </div>
 
-      <button className="fab mob" style={{ display: 'none' }}><i className="bx bx-plus"></i></button>
+      <button className="fab mob"><i className="bx bx-plus"></i></button>
     </>
   );
 }

@@ -15,14 +15,14 @@ function AdminLogin() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:8000/api/hq-rockshill/login', {
+      const res = await fetch('/api/hq-rockshill/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
       const data = await res.json();
 
-      if (data.status && data.token) {
+      if (data.token) {
         localStorage.setItem('adminToken', data.token);
         navigate('/hq-rockshill');
       } else {
@@ -85,6 +85,8 @@ function AdminLogin() {
           <input
             type="text" value={username} onChange={e => setUsername(e.target.value)} required
             placeholder="Masukkan username"
+            autoCapitalize="none"
+            autoCorrect="off"
             style={{
               width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid #d4c4b3',
               fontSize: 14, marginBottom: 16, outline: 'none', background: '#fff', fontFamily: 'Inter',

@@ -10,7 +10,7 @@ export default function AdminCalendar() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/hq-rockshill/reservations', {
+    fetch('/api/hq-rockshill/reservations', {
       headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
     })
       .then(r => r.json())
@@ -52,11 +52,16 @@ export default function AdminCalendar() {
   const prev = () => setCur(new Date(y, m - 1, 1));
   const next = () => setCur(new Date(y, m + 1, 1));
 
-  if (loading) return <div className="empty">Memuat kalender...</div>;
+  if (loading) return (
+    <div style={{ padding: '20px 0' }}>
+      <div className="skeleton skeleton-title" style={{ width: '40%' }}></div>
+      <div className="skeleton" style={{ width: '100%', height: '300px', borderRadius: '12px' }}></div>
+    </div>
+  );
 
   return (
     <>
-      <div className="pg-hdr">
+      <div className="pg-hdr desk">
         <div>
           <h1>Kalender Ketersediaan</h1>
           <p>Kelola dan lihat ketersediaan area perkemahan.</p>
@@ -67,6 +72,12 @@ export default function AdminCalendar() {
           <button className="btn btn-ol btn-icon" onClick={next}><i className="bx bx-chevron-right"></i></button>
           <button className="btn btn-ol" onClick={() => setCur(new Date())} style={{ marginLeft: 8 }}>Hari Ini</button>
         </div>
+      </div>
+
+      {/* Mobile title */}
+      <div className="mob" style={{ flexDirection: 'column', marginBottom: 14 }}>
+        <h1 style={{ fontFamily: 'Outfit', fontSize: 24, fontWeight: 700 }}>Kalender</h1>
+        <p style={{ fontSize: 13, color: 'var(--on-dim)' }}>Ketersediaan area perkemahan</p>
       </div>
 
       {/* ── DESKTOP ── */}

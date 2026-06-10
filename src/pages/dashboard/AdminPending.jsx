@@ -13,7 +13,7 @@ export default function AdminPending() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const load = () => {
-    fetch('http://localhost:8000/api/hq-rockshill/reservations', {
+    fetch('/api/hq-rockshill/reservations', {
       headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
     })
       .then(r => r.json())
@@ -29,7 +29,7 @@ export default function AdminPending() {
       return;
     }
     
-    fetch(`http://localhost:8000/api/hq-rockshill/reservations/${confirmId}/status`, {
+    fetch(`/api/hq-rockshill/reservations/${confirmId}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
       body: JSON.stringify({ 
@@ -44,7 +44,7 @@ export default function AdminPending() {
   };
 
   const processDecline = () => {
-    fetch(`http://localhost:8000/api/hq-rockshill/reservations/${declineId}/status`, {
+    fetch(`/api/hq-rockshill/reservations/${declineId}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
       body: JSON.stringify({ status: 'Declined' }),
@@ -54,7 +54,14 @@ export default function AdminPending() {
       .catch(() => alert('Gagal menolak reservasi.'));
   };
 
-  if (loading) return <div className="empty">Memuat data...</div>;
+  if (loading) return (
+    <div style={{ padding: '20px 0' }}>
+      <div className="skeleton skeleton-title"></div>
+      <div className="skeleton skeleton-card"></div>
+      <div className="skeleton skeleton-card"></div>
+      <div className="skeleton skeleton-card"></div>
+    </div>
+  );
 
   const filteredRows = rows.filter(r => 
     r.nama.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -65,7 +72,7 @@ export default function AdminPending() {
 
   return (
     <>
-      <div className="pg-hdr">
+      <div className="pg-hdr desk">
         <div>
           <h1>Reservasi Belum Bayar</h1>
           <p>Mengelola antrean pembayaran tamu yang tertunda.</p>
@@ -85,6 +92,24 @@ export default function AdminPending() {
             <button className="btn btn-ol"><i className="bx bx-sort-alt-2"></i> Urutkan</button>
           </div>
         </div>
+      </div>
+
+      {/* Mobile title */}
+      <div className="mob" style={{ flexDirection: 'column', marginBottom: 10 }}>
+        <h1 style={{ fontFamily: 'Outfit', fontSize: 24, fontWeight: 700 }}>Belum Bayar</h1>
+        <p style={{ fontSize: 13, color: 'var(--on-dim)' }}>Antrean pembayaran tertunda</p>
+      </div>
+
+      {/* Mobile search */}
+      <div className="mob" style={{ position: 'relative', marginBottom: 14 }}>
+        <i className='bx bx-search' style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--on-dim)' }}></i>
+        <input 
+          type="text" 
+          placeholder="Cari nama, booking..." 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ width: '100%', padding: '10px 10px 10px 34px', borderRadius: '8px', border: '1px solid var(--outline-var)', outline: 'none', fontFamily: 'Inter', fontSize: '13px' }}
+        />
       </div>
 
       {/* ── DESKTOP TABLE ── */}

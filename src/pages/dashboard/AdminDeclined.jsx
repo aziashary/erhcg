@@ -7,7 +7,7 @@ export default function AdminDeclined() {
   const [sel, setSel] = useState(null);
 
   const load = () => {
-    fetch('http://localhost:8000/api/hq-rockshill/reservations', {
+    fetch('/api/hq-rockshill/reservations', {
       headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
     })
       .then(r => r.json())
@@ -22,7 +22,7 @@ export default function AdminDeclined() {
 
   const reactivate = (id) => {
     if (!window.confirm('Aktifkan kembali reservasi ini ke status Menunggu Konfirmasi?')) return;
-    fetch(`http://localhost:8000/api/hq-rockshill/reservations/${id}/status`, {
+    fetch(`/api/hq-rockshill/reservations/${id}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
       body: JSON.stringify({ status: 'Menunggu Konfirmasi' }),
@@ -32,15 +32,28 @@ export default function AdminDeclined() {
       .catch(() => alert('Gagal mengaktifkan reservasi.'));
   };
 
-  if (loading) return <div className="empty">Memuat data...</div>;
+  if (loading) return (
+    <div style={{ padding: '20px 0' }}>
+      <div className="skeleton skeleton-title"></div>
+      <div className="skeleton skeleton-card"></div>
+      <div className="skeleton skeleton-card"></div>
+      <div className="skeleton skeleton-card"></div>
+    </div>
+  );
 
   return (
     <>
-      <div className="pg-hdr">
+      <div className="pg-hdr desk">
         <div>
           <h1>Riwayat / Dibatalkan</h1>
           <p>Daftar reservasi yang kadaluwarsa atau ditolak.</p>
         </div>
+      </div>
+
+      {/* Mobile title */}
+      <div className="mob" style={{ flexDirection: 'column', marginBottom: 14 }}>
+        <h1 style={{ fontFamily: 'Outfit', fontSize: 24, fontWeight: 700 }}>Riwayat</h1>
+        <p style={{ fontSize: 13, color: 'var(--on-dim)' }}>Reservasi ditolak & kedaluwarsa</p>
       </div>
 
       {/* ── DESKTOP TABLE ── */}

@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { Navigate, Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import './dashboard.css';
 
@@ -11,6 +12,7 @@ const NAV = [
 ];
 
 export default function AdminLayout() {
+  const [showLogout, setShowLogout] = useState(false);
   const token = localStorage.getItem('adminToken');
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -60,8 +62,7 @@ export default function AdminLayout() {
           <h2>Rockshill Admin</h2>
         </div>
           <div className="mob-hdr-right">
-            <i className="bx bx-bell" style={{ fontSize: 22, color: 'var(--on-dim)' }}></i>
-            <div className="avatar"></div>
+            <i className="bx bx-log-out" style={{ fontSize: 26, color: 'var(--err)', cursor: 'pointer' }} onClick={() => setShowLogout(true)}></i>
           </div>
         </header>
 
@@ -80,6 +81,21 @@ export default function AdminLayout() {
           </Link>
         ))}
       </nav>
+      {/* ─── LOGOUT MODAL ─── */}
+      {showLogout && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div style={{ background: '#fff', padding: 24, borderRadius: 16, width: '100%', maxWidth: 320, boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+            <h3 style={{ marginTop: 0, fontSize: 18, fontFamily: 'Outfit', color: '#1e1b16', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <i className="bx bx-log-out" style={{ color: 'var(--err)', fontSize: 22 }}></i> Konfirmasi
+            </h3>
+            <p style={{ fontSize: 14, color: '#504538', marginBottom: 20, lineHeight: 1.5 }}>Apakah Anda yakin ingin keluar dari halaman dasbor?</p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button className="btn btn-ol" onClick={() => setShowLogout(false)} style={{ flex: 1 }}>Batal</button>
+              <button className="btn btn-pri" style={{ background: 'var(--err)', flex: 1 }} onClick={logout}>Ya, Keluar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
