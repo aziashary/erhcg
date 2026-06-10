@@ -26,7 +26,7 @@ export default function AdminLayout() {
       {/* ─── SIDEBAR ─── */}
       <aside className="sb desk">
         <div className="sb-brand">
-          <div className="sb-logo"><i className="bx bx-mountain"></i></div>
+          <img src="/logo.png" alt="Rockshill Logo" style={{ height: 34, width: 'auto', objectFit: 'contain' }} />
           <div>
             <h3>Rockshill</h3>
             <small>Admin Perkemahan</small>
@@ -55,7 +55,10 @@ export default function AdminLayout() {
       <div className="main-wrap">
         {/* Mobile header */}
         <header className="mob-hdr">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <img src="/logo.png" alt="Rockshill Logo" style={{ height: 26, width: 'auto', objectFit: 'contain' }} />
           <h2>Rockshill Admin</h2>
+        </div>
           <div className="mob-hdr-right">
             <i className="bx bx-bell" style={{ fontSize: 22, color: 'var(--on-dim)' }}></i>
             <div className="avatar"></div>

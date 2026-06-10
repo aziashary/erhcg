@@ -1,3 +1,5 @@
+const formatRupiah = (angka) => 'Rp ' + (angka || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
 function ReceiptModal({ reservation, onClose, onDecline }) {
   if (!reservation) return null;
   const r = reservation;
@@ -23,7 +25,7 @@ function ReceiptModal({ reservation, onClose, onDecline }) {
             <div className="rcpt-row"><span className="k">Check-in</span><span className="v">{r.checkin}</span></div>
             <div className="rcpt-row"><span className="k">Check-out</span><span className="v">{r.checkout}</span></div>
             <div className="rcpt-row"><span className="k">Area</span><span className="v">{r.area}</span></div>
-            <div className="rcpt-row"><span className="k">Peserta</span><span className="v">{r.pax} Orang</span></div>
+            <div className="rcpt-row"><span className="k">Peserta</span><span className="v">{r.pax}</span></div>
             {r.nights && <div className="rcpt-row"><span className="k">Durasi</span><span className="v">{r.nights} Malam</span></div>}
           </div>
           {(r.paketText || r.addonsText) && (
@@ -33,6 +35,16 @@ function ReceiptModal({ reservation, onClose, onDecline }) {
               {r.addonsText && <div style={{ fontSize: 12, whiteSpace: 'pre-line', marginTop: 6, lineHeight: 1.5 }}><strong>Tambahan:</strong><br />{r.addonsText}</div>}
             </div>
           )}
+          {r.status === 'Confirmed' && r.paymentType === 'dp' && (() => {
+            const totalNum = parseInt((r.total || '0').toString().replace(/[^0-9]/g, '') || 0, 10);
+            const payAmtNum = parseInt((r.paymentAmount || '0').toString().replace(/[^0-9]/g, '') || 0, 10);
+            return (
+              <div className="rcpt-rows" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+                <div className="rcpt-row"><span className="k">DP (Sudah Bayar)</span><span className="v" style={{ color: 'var(--pri)' }}>{formatRupiah(payAmtNum)}</span></div>
+                <div className="rcpt-row"><span className="k">Sisa Tagihan</span><span className="v" style={{ color: '#dc3545' }}>{formatRupiah(totalNum - payAmtNum)}</span></div>
+              </div>
+            );
+          })()}
           <div className="rcpt-total">
             <span className="lbl">Total</span>
             <span className="amt">{r.total || '-'}</span>

@@ -40,6 +40,7 @@ type ReservationRequest struct {
 	Area          string `json:"area" binding:"required"`
 	PaketText     string `json:"paketText"`
 	AddonsText    string `json:"addonsText"`
+	PackageName   string `json:"packageName"`
 	Total         string `json:"total"`
 }
 
@@ -73,7 +74,7 @@ func SubmitReservation(c *gin.Context) {
 		CheckIn:       checkInDate,
 		CheckOut:      checkOutDate,
 		Nights:        req.Nights,
-		PackageName:   "Sesuai Detail", // Simplified for MVP
+		PackageName:   req.PackageName,
 		PaxAdult:      req.Dewasa,
 		PaxChild:      req.Anak,
 		TotalAmount:   0, // Using string in JSON for now

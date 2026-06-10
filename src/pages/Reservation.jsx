@@ -314,6 +314,9 @@ export default function Reservation() {
     });
     if (addonsText === '') addonsText = '- Tidak ada\n';
 
+    const selectedPackages = packageDefs.filter(p => packages[p.id] > 0).map(p => p.name);
+    const packageName = selectedPackages.length > 0 ? selectedPackages.join(', ') : 'Sesuai Detail';
+
     const payload = {
       nama: formData.nama,
       wa: formData.wa,
@@ -329,6 +332,7 @@ export default function Reservation() {
       area: formData.area_camp,
       paketText: paketText.trim(),
       addonsText: addonsText.trim(),
+      packageName: packageName,
       total: formatRupiah(summary.total)
     };
 
