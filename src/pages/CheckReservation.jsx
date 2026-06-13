@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
+import { useSettings } from '../context/SettingsContext';
+import InvoiceModal from '../components/InvoiceModal';
 
 function formatTanggalIndo(dateStr) {
   if (!dateStr) return '-';
@@ -20,12 +22,14 @@ function formatRupiah(angka) {
 }
 
 export default function CheckReservation() {
+  const { settings } = useSettings();
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get('id') || '');
   const [result, setResult] = useState(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showCopyToast, setShowCopyToast] = useState(false);
+  const [showInvoice, setShowInvoice] = useState(false);
 
   const numericTotal = result ? parseInt(result.total?.replace(/[^0-9]/g, '') || '0', 10) : 0;
   const dpAmount = numericTotal / 2;
@@ -172,6 +176,29 @@ export default function CheckReservation() {
                   </div>
                   <div className={`invoice-status ${result.status === 'Confirmed' ? 'status-confirmed' : result.status === 'Expired' || result.status === 'Declined' ? 'status-expired' : 'status-unpaid'}`}>
                     {result.status === 'Confirmed' ? 'Confirmed' : result.status === 'Expired' ? 'Expired' : result.status === 'Declined' ? 'Declined' : 'Belum Dibayar'}
+                    
+                    {/* Sub-badge for Lunas/DP/Belum Lunas */}
+                    {result.status === 'Confirmed' && (() => {
+                      const payAmt = parseInt((result.paymentAmount || '').toString().replace(/[^0-9]/g, ''), 10) || 0;
+                      const numericTotal = parseInt(result.total?.replace(/[^0-9]/g, '') || '0', 10) || 0;
+                      
+                      let badgeIcon = "bx-time-five";
+                      let badgeText = "BELUM LUNAS";
+                      
+                      if (payAmt >= numericTotal && numericTotal > 0) {
+                        badgeIcon = "bx-check-circle";
+                        badgeText = "LUNAS";
+                      } else if (payAmt > 0) {
+                        badgeIcon = "bx-time-five";
+                        badgeText = "DOWN PAYMENT";
+                      }
+                      
+                      return (
+                        <div style={{ marginTop: '8px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                          <i className={`bx ${badgeIcon}`}></i> {badgeText}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
 
@@ -221,9 +248,43 @@ export default function CheckReservation() {
                   </div>
                 </div>
 
-                <div className="invoice-total">
-                  <span>Estimasi Total</span>
-                  <h3>{result.total}</h3>
+                <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '2px dashed #eee' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '1.2rem', fontWeight: 600, color: '#555' }}>Estimasi Total</span>
+                    <h3 style={{ fontSize: '1.8rem', color: 'var(--color-forest-green)', margin: 0 }}>{result.total}</h3>
+                  </div>
+                  
+                  {result.status === 'Confirmed' && (() => {
+                    const payAmt = parseInt((result.paymentAmount || '').toString().replace(/[^0-9]/g, ''), 10) || 0;
+                    const numericTotal = parseInt(result.total?.replace(/[^0-9]/g, '') || '0', 10) || 0;
+                    const isLunas = payAmt >= numericTotal && numericTotal > 0;
+                    
+                    if (!isLunas) {
+                      const sisa = Math.max(0, numericTotal - payAmt);
+                      return (
+                        <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #eaeaea' }}>
+                          {payAmt > 0 && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                              <span style={{ fontSize: '1.1rem', color: '#555' }}>DP</span>
+                              <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#333' }}>{formatRupiah(payAmt)}</span>
+                            </div>
+                          )}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '1.1rem', color: '#d9534f', fontWeight: 'bold' }}>{payAmt > 0 ? 'Sisa Pembayaran' : 'Belum Dibayar'}</span>
+                            <span style={{ fontSize: '1.4rem', color: '#d9534f', fontWeight: 'bold' }}>{formatRupiah(sisa)}</span>
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #eaeaea', textAlign: 'right' }}>
+                          <div style={{ fontSize: '1.2rem', color: '#28a745', fontWeight: 'bold' }}>
+                            <i className="bx bx-check-circle"></i> LUNAS
+                          </div>
+                        </div>
+                      );
+                    }
+                  })()}
                 </div>
 
                 {result.status !== 'Confirmed' && result.status !== 'Expired' && result.status !== 'Declined' && (
@@ -233,13 +294,13 @@ export default function CheckReservation() {
                     </h4>
                     <div className="rekening-box">
                       <div>
-                        <div className="bank-label">Bank BCA</div>
-                        <div className="norek">7361558573</div>
-                        <div className="an">A.n. Mochamad Azi Ashary</div>
+                        <div className="bank-label">{settings.bank_name}</div>
+                        <div className="norek">{settings.bank_account}</div>
+                        <div className="an">{settings.bank_holder}</div>
                       </div>
                       <button 
                         onClick={() => {
-                          navigator.clipboard.writeText('7361558573');
+                          navigator.clipboard.writeText(settings.bank_account);
                           setShowCopyToast(true);
                           setTimeout(() => setShowCopyToast(false), 2000);
                         }}
@@ -267,7 +328,7 @@ export default function CheckReservation() {
                   <div style={{ marginTop: '20px', textAlign: 'center' }}>
                     <p style={{ fontSize: '0.85rem', color: '#888' }}>*Tunjukan Kode Booking/ No Invoice ke admin Whatsapp untuk pertanyaan dan konfirmasi seputar reservasi</p>
                     <a 
-                      href={`https://wa.me/6281234567890?text=${encodeURIComponent(`Halo Admin, saya ingin konfirmasi pembayaran untuk reservasi dengan Kode Booking: *${result.booking_code || '-'}*` + (result.id ? ` / Invoice: *${result.id}*` : ''))}`} 
+                      href={`https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(`Halo Admin, saya ingin konfirmasi pembayaran untuk reservasi dengan Kode Booking: *${result.booking_code || '-'}*` + (result.id ? ` / Invoice: *${result.id}*` : ''))}`} 
                       target="_blank" 
                       className="btn btn-outline" 
                       rel="noreferrer"
@@ -275,6 +336,15 @@ export default function CheckReservation() {
                     >
                        <i className='bx bxl-whatsapp'></i> Hubungi Admin
                     </a>
+                    {result.id && (
+                      <button 
+                        onClick={() => setShowInvoice(true)} 
+                        className="btn btn-primary" 
+                        style={{ marginTop: '15px', marginLeft: '10px' }}
+                      >
+                        <i className='bx bx-receipt'></i> Lihat Invoice
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <div style={{ marginTop: '20px', textAlign: 'center' }}>
@@ -296,6 +366,8 @@ export default function CheckReservation() {
           <i className='bx bx-check-circle' style={{ color: '#4caf50', fontSize: '1.2rem' }}></i> Salin di Clipboard
         </div>
       )}
+
+      {showInvoice && <InvoiceModal reservation={result} onClose={() => setShowInvoice(false)} />}
     </main>
   );
 }

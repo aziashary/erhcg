@@ -22,9 +22,14 @@ function AdminLogin() {
       });
       const data = await res.json();
 
-      if (data.token) {
+      if (res.ok) {
         localStorage.setItem('adminToken', data.token);
-        navigate('/hq-rockshill');
+        localStorage.setItem('adminRole', data.role);
+        if (data.role === 'kasir') {
+          navigate('/hq-rockshill/calendar');
+        } else {
+          navigate('/hq-rockshill/dashboard');
+        }
       } else {
         setError(data.error || 'Login gagal. Periksa username dan password.');
       }

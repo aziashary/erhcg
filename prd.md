@@ -292,6 +292,21 @@ Admin menerima:
 * Detail kebutuhan alat.
 * Status pembayaran.
 
+### 6.8 Reservasi Khusus (Admin Generated Link)
+
+Flow khusus untuk customer yang menghubungi via WhatsApp terlebih dahulu:
+
+1. Admin menanyakan kebutuhan customer (jumlah peserta, paket tenda).
+2. Admin membuka halaman khusus **Buat Link Reservasi** di dashboard.
+3. Admin menginput jumlah HTM dan paket tenda yang disepakati.
+4. Sistem menghasilkan Link Reservasi Khusus yang di-*share* ke customer.
+5. Customer membuka link:
+   * **Ringkasan Biaya** berada di paling atas (menampilkan paket dari admin).
+   * **Data Diri** di bagian tengah.
+   * **Tambahan Sewa Alat & Extra** di bagian bawah.
+   * Paket Tenda tidak lagi ditampilkan sebagai list utama, melainkan tersembunyi di dalam "Alat Lainnya".
+   * Kuantitas paket dan HTM yang diatur admin **terkunci** (tidak bisa dikurangi oleh customer, namun customer masih bisa menambah).
+
 ## 7. Dashboard Admin
 
 ### 7.1 Login Admin
@@ -1848,3 +1863,17 @@ Aturan terkait Area dan Paket telah ditetapkan sebagai berikut:
   * Area 1 sangat disarankan untuk kelompok dengan 2-3 tenda atau rombongan 6-12 orang.
 * **Pembatasan Paket 4 Orang**: Paket berkapasitas 4 orang HANYA diizinkan di Area 1, 3, 4, 5, 8, dan Campervan.
 * **Pembatasan Area Khusus**: Area Campervan dan Area 8 diprioritaskan KHUSUS untuk "Bawa Tenda Sendiri" pada saat weekend/hari libur. Pada saat weekday, bawa tenda sendiri bebas di semua area.
+
+
+## 27. Role User 
+
+### 27.1 Kasir
+
+Hanya akses kalendar dan POS juga bisa liat list reservasi.
+
+## 27.2 Admin
+
+Semua akses kecuali pengaturan dan manajemen user
+
+## 27.3 SuperAdmin
+All Akses

@@ -6,7 +6,7 @@
    ============================================================== */
 
 /* ── TOKENS ────────────────────────────────────── */
-.admin-root {
+:root {
   --bg:            #fff8ef;
   --surface:       #fff8ef;
   --surface-low:   #f9f3e9;
@@ -47,8 +47,9 @@
 
   --sidebar-w: 260px;
   --hdr-h: 60px;
+}
 
-  /* layout */
+.admin-root {
   display: flex;
   min-height: 100vh;
   background: var(--bg);
@@ -283,7 +284,9 @@
 .cal-d.dim { color:var(--outline); }
 .cal-areas { display:flex;flex-wrap:wrap;gap:2px; }
 .cab { width:20px;height:20px;display:flex;align-items:center;justify-content:center;border-radius:var(--r-xs);font-size:9px;font-weight:700; }
+.cab.avail { background:transparent;color:var(--on-dim);border:1px solid var(--outline-var); }
 .cab.ok  { background:var(--sec-ctr);color:var(--on-sec-ctr); }
+.cab.warn { background:#fff3cd;color:#856404; }
 .cab.no  { background:var(--err-ctr);color:var(--err);text-decoration:line-through; }
 .cal-full { display:inline-block;padding:2px 8px;border-radius:var(--r-xs);font-size:10px;font-weight:700;background:var(--err-ctr);color:var(--err); }
 
@@ -322,12 +325,12 @@
   display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;
   animation:_fi .2s ease;
 }
-.rcpt { background:var(--surface);width:100%;max-width:380px;border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh-3);animation:_su .25s ease; }
-.rcpt-hdr { background:var(--pri);color:var(--on-pri);padding:22px;text-align:center; }
+.rcpt { background:var(--surface);width:100%;max-width:380px;border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh-3);animation:_su .25s ease; display:flex; flex-direction:column; max-height:90vh; }
+.rcpt-hdr { background:var(--pri);color:var(--on-pri);padding:22px;text-align:center; flex-shrink:0; }
 .rcpt-hdr h2 { font-size:20px;color:#fff; }
 .rcpt-hdr p  { font-size:11px;opacity:.8;margin-top:3px;text-transform:uppercase;letter-spacing:.05em; }
-.rcpt-saw { height:10px;background-image:radial-gradient(circle at 50% 0%,#fff 5px,transparent 6px);background-size:14px 10px;background-repeat:repeat-x;background-position:top;background-color:#fff; }
-.rcpt-body { background:#fff;padding:0 22px 22px; }
+.rcpt-saw { height:10px;background-image:radial-gradient(circle at 50% 0%,#fff 5px,transparent 6px);background-size:14px 10px;background-repeat:repeat-x;background-position:top;background-color:#fff; flex-shrink:0; }
+.rcpt-body { background:#fff;padding:0 22px 22px; overflow-y:auto; }
 .rcpt-ids  { text-align:center;padding:18px 0;border-bottom:1px dashed var(--outline-var); }
 .rcpt-ids .lbl { font-size:10px;color:var(--on-dim);text-transform:uppercase;letter-spacing:.06em;font-weight:600; }
 .rcpt-ids .val { font:700 16px/1 'Outfit';margin-top:2px; }
@@ -340,7 +343,7 @@
 .rcpt-total { display:flex;justify-content:space-between;align-items:center;padding:14px;background:var(--surface-low);border-radius:var(--r-sm);margin-top:14px; }
 .rcpt-total .lbl { font-size:13px;font-weight:600; }
 .rcpt-total .amt { font:700 20px/1 'Outfit';color:var(--pri); }
-.rcpt-foot { padding:14px 22px;background:var(--surface-low);border-top:1px solid var(--outline-var); }
+.rcpt-foot { padding:14px 22px;background:var(--surface-low);border-top:1px solid var(--outline-var); flex-shrink:0; }
 
 /* ── FAB ───────────────────────────────────────── */
 .fab { position:fixed;bottom:76px;right:16px;width:48px;height:48px;border-radius:var(--r-full);background:var(--pri);color:var(--on-pri);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:var(--sh-3);z-index:100;transition:transform .12s; }
@@ -409,3 +412,9 @@
   margin-bottom: 24px;
   border-radius: 4px;
 }
+
+/* ── SETTINGS FORM ─────────────────────────────── */
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--on-dim); margin-bottom: 8px; }
+.form-group .input { width: 100%; padding: 10px 14px; border-radius: var(--r-sm); border: 1px solid var(--outline-var); background: var(--card); color: var(--on); font-family: 'Inter'; font-size: 14px; outline: none; transition: border-color 0.15s; }
+.form-group .input:focus { border-color: var(--pri); }

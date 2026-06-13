@@ -1,49 +1,16 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useSettings } from '../context/SettingsContext';
 import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import SkeletonForm from '../components/SkeletonForm';
 
-const packageDefs = [
-  { id: 'lengkap_4p', name: 'Paket Lengkap 4P', price: 680000, htm: 'included', htmPax: 4, capacity: 4, isRecommended: true },
-  { id: 'lengkap_2p', name: 'Paket Lengkap 2P', price: 560000, htm: 'included', htmPax: 2, capacity: 2, isRecommended: true },
-  { id: 'konten_4p', name: 'Paket Konten 4P', price: 340000, htm: 'not_included', capacity: 4, isBestseller: true },
-  { id: 'konten_2p', name: 'Paket Konten 2P', price: 290000, htm: 'not_included', capacity: 2, isBestseller: true },
-  { id: 'fullset_4p', name: 'Paket Fullset 4P', price: 240000, htm: 'not_included', capacity: 4 },
-  { id: 'fullset_2p', name: 'Paket Fullset 2P', price: 190000, htm: 'not_included', capacity: 2 },
-  { id: 'tenda_sendiri', name: 'Bawa Tenda Sendiri', price: 0, htm: 'special', capacity: 999 }
-];
-
-const addonDefs = [
-  { id: 'paket_grill', name: 'Paket Grill', price: 130000, type: 'flat' },
-  { id: 'kompor_gas', name: 'Kompor + Gas', price: 50000, type: 'night' },
-  { id: 'nesting', name: 'Nesting', price: 30000, type: 'night' },
-  { id: 'kayu_bakar', name: 'Kayu Bakar', price: 35000, type: 'flat' },
-  { id: 'sleeping_bag', name: 'Sleeping Bag', price: 15000, type: 'night' },
-  { id: 'matras_90', name: 'Matras 90x180', price: 10000, type: 'night' },
-  { id: 'matras_180', name: 'Matras 180x180', price: 20000, type: 'night' },
-  { id: 'lampu_tenda', name: 'Lampu Tenda', price: 15000, type: 'night' },
-  { id: 'lampu_tumblr', name: 'Lampu Tumblr', price: 25000, type: 'night' },
-  { id: 'kursi_lipat', name: 'Kursi Lipat', price: 20000, type: 'night' },
-  { id: 'meja_lipat', name: 'Meja Lipat', price: 35000, type: 'night' },
-  { id: 'meja_lipat_besi', name: 'Meja Lipat Besi', price: 35000, type: 'night' },
-  { id: 'kabel_roll', name: 'Kabel Roll', price: 30000, type: 'night' },
-  { id: 'kasur', name: 'Kasur', price: 35000, type: 'night' },
-  { id: 'tiang_besi', name: 'Tiang Besi', price: 5000, type: 'night' },
-  { id: 'tripod', name: 'Tripod', price: 30000, type: 'night' },
-];
-
-const paketDetails = {
-  'lengkap_4p': { title: 'Paket Lengkap 4P', items: ['Tenda 4P, 4 SB, 4 Matras 90x180', 'Lampu tenda & Tumblr', '4 Kursi & 1 Meja, Kabel Roll', 'Paket Grill & Alat Masak', 'Termasuk HTM 4 Orang & Flysheet'] },
-  'lengkap_2p': { title: 'Paket Lengkap 2P', items: ['Tenda 2P, 2 SB, 2 Matras 90x180', 'Lampu tenda & Tumblr', '2 Kursi & 1 Meja, Kabel Roll', 'Paket Grill & Alat Masak', 'Termasuk HTM 2 Orang & Flysheet'] },
-  'konten_4p': { title: 'Paket Konten 4P', items: ['Tenda 4P, 4 SB, 4 Matras 90x180', 'Lampu tenda & Tumblr', '4 Kursi & 1 Meja', 'Kabel Roll & Tripod', '*Belum termasuk HTM & flysheet'] },
-  'konten_2p': { title: 'Paket Konten 2P', items: ['Tenda 2P, 2 SB, 2 Matras 90x180', 'Lampu tenda & Tumblr', '2 Kursi & 1 Meja', 'Kabel Roll & Tripod', '*Belum termasuk HTM & flysheet'] },
-  'fullset_4p': { title: 'Paket Fullset 4P', items: ['Tenda 4P, 4 SB, 4 Matras 90x180', 'Lampu tenda & Kabel Roll', '*Belum termasuk HTM & flysheet'] },
-  'fullset_2p': { title: 'Paket Fullset 2P', items: ['Tenda 2P, 2 SB, 2 Matras 90x180', 'Lampu tenda & Kabel Roll', '*Belum termasuk HTM & flysheet'] }
-};
 
 function formatRupiah(angka) {
   return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
 export default function Reservation() {
+  const { settings } = useSettings();
   const today = new Date();
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -56,13 +23,61 @@ export default function Reservation() {
     jam_kedatangan: '', area_camp: ''
   });
 
-  const [packages, setPackages] = useState(
-    packageDefs.reduce((acc, curr) => ({ ...acc, [curr.id]: 0 }), {})
-  );
+  const [packageDefs, setPackageDefs] = useState([]);
+  const [addonDefs, setAddonDefs] = useState([]);
+  const [isLoadingCatalog, setIsLoadingCatalog] = useState(true);
 
-  const [addons, setAddons] = useState(
-    addonDefs.reduce((acc, curr) => ({ ...acc, [curr.id]: 0 }), {})
-  );
+  const [packages, setPackages] = useState({});
+  const [addons, setAddons] = useState({});
+
+  useEffect(() => {
+    fetch('/api/catalogs')
+      .then(res => res.json())
+      .then(data => {
+        const cat = data.data || [];
+        const pDefs = cat.filter(c => c.category === 'package').map(c => ({
+          id: c.key_id,
+          name: c.name,
+          price: c.price,
+          htm: c.htm,
+          capacity: c.capacity,
+          description: c.description,
+          isRecommended: c.key_id.startsWith('lengkap_'),
+          isBestseller: c.key_id.startsWith('konten_')
+        }));
+
+        // Sort addonDefs exactly as the original hardcoded list
+        const desiredAddonOrder = [
+          'paket_grill', 'kompor_gas', 'nesting', 'kayu_bakar', 'sleeping_bag',
+          'matras_90', 'matras_180', 'lampu_tenda', 'lampu_tumblr', 'kursi_lipat',
+          'meja_lipat_besi', 'kabel_roll', 'kasur', 'tiang_besi', 'tripod',
+          'extra_sosis', 'extra_daging', 'extra_ayam'
+        ];
+
+        const aDefs = cat.filter(c => c.category === 'addon').map(c => ({
+          id: c.key_id,
+          name: c.name,
+          price: c.price,
+          type: c.billing_type
+        })).sort((a, b) => {
+          let ia = desiredAddonOrder.indexOf(a.id);
+          let ib = desiredAddonOrder.indexOf(b.id);
+          if (ia === -1) ia = 999;
+          if (ib === -1) ib = 999;
+          return ia - ib;
+        });
+        setPackageDefs(pDefs);
+        setAddonDefs(aDefs);
+
+        setPackages(pDefs.reduce((acc, curr) => ({ ...acc, [curr.id]: 0 }), {}));
+        setAddons(aDefs.reduce((acc, curr) => ({ ...acc, [curr.id]: 0 }), {}));
+        setIsLoadingCatalog(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setIsLoadingCatalog(false);
+      });
+  }, []);
 
   const [flysheetRemoved, setFlysheetRemoved] = useState(false);
   const [activeModal, setActiveModal] = useState(null); // 'info', 'alat', null
@@ -74,12 +89,22 @@ export default function Reservation() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => {
+      const next = { ...prev, [name]: value };
+      if (name === 'checkin') {
+        const ci = new Date(value);
+        if (!isNaN(ci.getTime())) {
+          ci.setDate(ci.getDate() + 1);
+          next.checkout = ci.toISOString().split('T')[0];
+        }
+      }
+      return next;
+    });
   };
 
   const handlePackageChange = (id, delta) => {
     setPackages(prev => {
-      const current = prev[id];
+      const current = prev[id] || 0;
       const next = Math.max(0, current + delta);
       return { ...prev, [id]: next };
     });
@@ -88,7 +113,7 @@ export default function Reservation() {
 
   const handleAddonChange = (id, delta) => {
     setAddons(prev => {
-      const current = prev[id];
+      const current = prev[id] || 0;
       const next = Math.max(0, current + delta);
       return { ...prev, [id]: next };
     });
@@ -155,7 +180,7 @@ export default function Reservation() {
 
     if (changed) {
       setPackages(newPackages);
-      alert(alerts.join('\n\n'));
+      Swal.fire('Perhatian', alerts.join('\n\n', 'warning'));
     }
   }, [formData.area_camp, isWeekend, packages]); // Dependency note: this might loop if not careful. The logic is only to zero out, so it stabilizes.
 
@@ -169,7 +194,7 @@ export default function Reservation() {
     const dewasa = parseInt(formData.jml_dewasa) || 0;
     const anak = parseInt(formData.jml_anak) || 0;
     const totalPeople = dewasa + anak;
-    
+
     let totalMaxCapacity = 0;
     let hasPackages = false;
     let hasTendaSendiri = packages.tenda_sendiri > 0;
@@ -192,7 +217,7 @@ export default function Reservation() {
   const summary = useMemo(() => {
     let htmlLines = [];
     let total = 0;
-    
+
     let totalHtmIncluded = 0;
     let totalHtmDiscountCapacity = 0;
     let hasKontenOrFullset = false;
@@ -208,8 +233,12 @@ export default function Reservation() {
           sumKontenFullset += qty;
         }
 
-        if (p.htm === 'included') totalHtmIncluded += (qty * (p.htmPax || 0));
-        else if (p.htm === 'not_included') totalHtmDiscountCapacity += (qty * p.capacity);
+        if (p.htm === 'included') {
+          totalHtmIncluded += (qty * (p.capacity || 0));
+          totalHtmDiscountCapacity += (qty * 1); // 1 extra person gets discount
+        } else if (p.htm === 'not_included') {
+          totalHtmDiscountCapacity += (qty * ((p.capacity || 0) + 1)); // base capacity + 1 extra person gets discount
+        }
 
         if (p.price > 0) {
           const totalItem = p.price * nights * qty;
@@ -241,8 +270,8 @@ export default function Reservation() {
     if (hasKontenOrFullset && !flysheetRemoved) {
       const t = 35000 * nights * sumKontenFullset;
       total += t;
-      htmlLines.push({ 
-        label: `${sumKontenFullset}x Flysheet${nightSuffix}`, 
+      htmlLines.push({
+        label: `${sumKontenFullset}x Flysheet${nightSuffix}`,
         val: t,
         removable: false
       });
@@ -262,7 +291,7 @@ export default function Reservation() {
     });
 
     return { htmlLines, total };
-  }, [formData.jml_dewasa, packages, addons, nights, flysheetRemoved]);
+  }, [formData.jml_dewasa, packages, addons, nights, flysheetRemoved, packageDefs, addonDefs]);
 
   const hasAnyOrder = summary.total > 0 || packages.tenda_sendiri > 0;
   const isSubmitDisabled = !capacityInfo.isValid || !hasAnyOrder || !turnstileToken || isSubmitting;
@@ -271,8 +300,13 @@ export default function Reservation() {
     e.preventDefault();
     if (!capacityInfo.isValid) return;
 
+    if (formData.jam_kedatangan < '14:00' && formData.jam_kedatangan !== '00:00') {
+      Swal.fire('Perhatian', 'Check in 14.00-00.00', 'warning');
+      return;
+    }
+
     setIsSubmitting(true);
-    
+
     // Generate Whatsapp Message
     function formatTanggalIndo(dateStr) {
       const date = new Date(dateStr);
@@ -290,9 +324,9 @@ export default function Reservation() {
       const qty = packages[p.id];
       if (qty > 0) {
         if (p.price > 0) {
-           paketText += `- ${p.name.padEnd(23, ' ')} ${qty}x\n   ${formatRupiah(p.price * nights * qty).replace('Rp ', '')}\n`;
+          paketText += `- ${p.name.padEnd(23, ' ')} ${qty}x\n   ${formatRupiah(p.price * nights * qty).replace('Rp ', '')}\n`;
         } else {
-           paketText += `- ${p.name.padEnd(23, ' ')} ${qty}x\n`;
+          paketText += `- ${p.name.padEnd(23, ' ')} ${qty}x\n`;
         }
       }
     });
@@ -301,8 +335,8 @@ export default function Reservation() {
     let addonsText = '';
     const hasKontenOrFullset = ['konten_4p', 'fullset_4p', 'konten_2p', 'fullset_2p'].some(id => packages[id] > 0);
     if (hasKontenOrFullset && !flysheetRemoved) {
-       const qty = ['konten_4p', 'fullset_4p', 'konten_2p', 'fullset_2p'].reduce((sum, id) => sum + packages[id], 0);
-       addonsText += `- Flysheet                 ${qty}x\n   ${formatRupiah(35000 * nights * qty).replace('Rp ', '')}\n`;
+      const qty = ['konten_4p', 'fullset_4p', 'konten_2p', 'fullset_2p'].reduce((sum, id) => sum + packages[id], 0);
+      addonsText += `- Flysheet                 ${qty}x\n   ${formatRupiah(35000 * nights * qty).replace('Rp ', '')}\n`;
     }
     addonDefs.forEach(a => {
       const qty = addons[a.id];
@@ -312,10 +346,62 @@ export default function Reservation() {
         addonsText += `- ${a.name.padEnd(23, ' ')} ${qty}x\n   ${formatRupiah(t).replace('Rp ', '')}\n`;
       }
     });
+
+    // Add HTM to addonsText
+    let totalHtmIncluded = 0;
+    let totalHtmDiscountCapacity = 0;
+    packageDefs.forEach(p => {
+      const qty = packages[p.id];
+      if (qty > 0) {
+        if (p.htm === 'included') {
+          totalHtmIncluded += (qty * (p.capacity || 0));
+          totalHtmDiscountCapacity += (qty * 1);
+        } else if (p.htm === 'not_included') {
+          totalHtmDiscountCapacity += (qty * ((p.capacity || 0) + 1));
+        }
+      }
+    });
+
+    const dewasa = parseInt(formData.jml_dewasa) || 0;
+    const remainingPeople = Math.max(0, dewasa - totalHtmIncluded);
+    const peopleAt35k = Math.min(remainingPeople, totalHtmDiscountCapacity);
+    const peopleAt45k = remainingPeople - peopleAt35k;
+
+    if (peopleAt35k > 0) {
+      addonsText += `- HTM Paket 35k          ${peopleAt35k}x\n   ${formatRupiah(peopleAt35k * 35000).replace('Rp ', '')}\n`;
+    }
+    if (peopleAt45k > 0) {
+      addonsText += `- HTM Tenda Sendiri 45k  ${peopleAt45k}x\n   ${formatRupiah(peopleAt45k * 45000).replace('Rp ', '')}\n`;
+    }
+
     if (addonsText === '') addonsText = '- Tidak ada\n';
 
     const selectedPackages = packageDefs.filter(p => packages[p.id] > 0).map(p => p.name);
     const packageName = selectedPackages.length > 0 ? selectedPackages.join(', ') : 'Sesuai Detail';
+
+    let totalTents = 0;
+    Object.keys(packages).forEach(id => {
+      totalTents += packages[id];
+    });
+
+    const items = [];
+    packageDefs.forEach(p => {
+      const qty = packages[p.id];
+      if (qty > 0) {
+        items.push({ id: p.id, name: p.name, type: 'package', quantity: qty, price: p.price, subtotal: p.price * nights * qty });
+      }
+    });
+    addonDefs.forEach(a => {
+      const qty = addons[a.id];
+      if (qty > 0) {
+        let t = a.price * qty;
+        if (a.type !== 'flat') t *= nights;
+        items.push({ id: a.id, name: a.name, type: 'addon', quantity: qty, price: a.price, subtotal: t });
+      }
+    });
+    if (packages['tenda_sendiri'] > 0) {
+        items.push({ id: 'tenda_sendiri', name: 'Bawa Tenda Sendiri', type: 'package', quantity: packages['tenda_sendiri'], price: 0, subtotal: 0 });
+    }
 
     const payload = {
       nama: formData.nama,
@@ -333,7 +419,9 @@ export default function Reservation() {
       paketText: paketText.trim(),
       addonsText: addonsText.trim(),
       packageName: packageName,
-      total: formatRupiah(summary.total)
+      total: formatRupiah(summary.total),
+      totalTents: totalTents,
+      items: items
     };
 
     fetch('/api/reservations', {
@@ -341,45 +429,67 @@ export default function Reservation() {
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify(payload)
     })
-    .then(res => res.json())
-    .then(data => {
-      setIsSubmitting(false);
-      if (data.booking_code) {
-        const invoiceId = data.invoice_id; // will be null/undefined
-        const bookingCode = data.booking_code;
-        
-        let message = `Halo Admin Rockshill Campground! Saya ingin konfirmasi pembayaran reservasi dengan detail:\n\n*Kode Booking:* ${bookingCode}\n\n`;
-        message += `*Data Pemesan*\nNama: ${formData.nama}\nWhatsApp: ${formData.wa}\n`;
-        if (formData.email) message += `Email: ${formData.email}\n`;
-        message += `Peserta: ${formData.jml_dewasa} Dewasa, ${formData.jml_anak} Anak\nKendaraan: ${formData.jml_motor} Motor, ${formData.jml_mobil} Mobil\n\n`;
-        message += `*Jadwal & Lokasi*\nJadwal: ${formatTanggalIndo(formData.checkin)} s.d ${formatTanggalIndo(formData.checkout)} (${nights} Malam)\n`;
-        message += `Jam Kedatangan: ${formData.jam_kedatangan}\nArea Camp: ${formData.area_camp}\n\n`;
-        message += `*Pilihan Paket*\n${paketText}\n*Alat Tambahan*\n${addonsText}\n*Estimasi Total: ${formatRupiah(summary.total)}*\n\nTerlampir bukti transfer saya. Terima kasih!`;
+      .then(res => res.json())
+      .then(data => {
+        setIsSubmitting(false);
+        if (data.booking_code) {
+          const invoiceId = data.invoice_id; // will be null/undefined
+          const bookingCode = data.booking_code;
 
-        setSuccessData({
-          invoiceId,
-          bookingCode,
-          total: summary.total,
-          message: message
-        });
-        window.scrollTo(0,0);
-      } else {
-        alert('Gagal membuat reservasi: ' + (data.error || 'Error server'));
-      }
-    })
-    .catch(err => {
-      setIsSubmitting(false);
-      console.error(err);
-      alert('Terjadi kesalahan koneksi saat mengirim data reservasi.');
-    });
+          let message = `Halo Admin Rockshill Campground! Saya ingin konfirmasi pembayaran reservasi dengan detail:\n\n*Kode Booking:* ${bookingCode}\n\n`;
+          message += `*Data Pemesan*\nNama: ${formData.nama}\nWhatsApp: ${formData.wa}\n`;
+          if (formData.email) message += `Email: ${formData.email}\n`;
+          message += `Peserta: ${formData.jml_dewasa} Dewasa, ${formData.jml_anak} Anak\nKendaraan: ${formData.jml_motor} Motor, ${formData.jml_mobil} Mobil\n\n`;
+          message += `*Jadwal & Lokasi*\nJadwal: ${formatTanggalIndo(formData.checkin)} s.d ${formatTanggalIndo(formData.checkout)} (${nights} Malam)\n`;
+          message += `Jam Kedatangan: ${formData.jam_kedatangan}\nArea Camp: ${formData.area_camp}\n\n`;
+          message += `*Pilihan Paket*\n${paketText}\n*Alat Tambahan*\n${addonsText}\n*Estimasi Total: ${formatRupiah(summary.total)}*\n\nTerlampir bukti transfer saya. Terima kasih!`;
+
+          setSuccessData({
+            invoiceId,
+            bookingCode,
+            total: summary.total,
+            message: message
+          });
+          window.scrollTo(0, 0);
+        } else {
+          Swal.fire('Error', 'Gagal membuat reservasi: ' + (data.error || 'Error server', 'error'));
+        }
+      })
+      .catch(err => {
+        setIsSubmitting(false);
+        console.error(err);
+        Swal.fire('Perhatian', 'Terjadi kesalahan koneksi saat mengirim data reservasi.', 'warning');
+      });
   };
 
   const removeFlysheet = () => {
-    if(confirm("Yakin ingin menghapus Flysheet?\nFlysheet sangat penting untuk menahan embun malam dan hujan agar tenda tidak basah/rembes.")) {
-      if(confirm("Apakah Anda benar-benar yakin?\nKenyamanan camping Anda mungkin akan terganggu tanpa Flysheet.")) {
-        setFlysheetRemoved(true);
+    Swal.fire({
+      title: 'Yakin ingin menghapus Flysheet?',
+      text: "Flysheet sangat penting untuk menahan embun malam dan hujan agar tenda tidak basah/rembes.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Ya, Hapus!',
+      cancelButtonText: 'Batal'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: 'Apakah Anda benar-benar yakin?',
+          text: "Kenyamanan camping Anda mungkin akan terganggu tanpa Flysheet.",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Ya, Saya Yakin!',
+          cancelButtonText: 'Batal'
+        }).then((res2) => {
+          if (res2.isConfirmed) {
+            setFlysheetRemoved(true);
+          }
+        });
       }
-    }
+    });
   };
 
   if (successData) {
@@ -402,13 +512,13 @@ export default function Reservation() {
             <p>Silakan lakukan pembayaran melalui transfer bank ke rekening berikut:</p>
             <div className="rekening-box" style={{ marginBottom: '30px' }}>
               <div>
-                <div className="bank-label">Bank BCA</div>
-                <div className="norek">7361558573</div>
-                <div className="an">A.n. Mochamad Azi Ashary</div>
+                <div className="bank-label">{settings.bank_name}</div>
+                <div className="norek">{settings.bank_account}</div>
+                <div className="an">{settings.bank_holder}</div>
               </div>
-              <button 
+              <button
                 onClick={() => {
-                  navigator.clipboard.writeText('7361558573');
+                  navigator.clipboard.writeText(settings.bank_account);
                   setShowCopyToast(true);
                   setTimeout(() => setShowCopyToast(false), 2000);
                 }}
@@ -455,7 +565,7 @@ export default function Reservation() {
             </div>
 
             <p style={{ textAlign: 'center', marginBottom: '15px', color: '#555' }}>Silakan transfer dan kirimkan bukti pembayaran melalui tombol di bawah ini:</p>
-            <a href={`https://wa.me/6281234567890?text=${encodeURIComponent(successData.message)}`} target="_blank" rel="noopener noreferrer" className="btn btn-primary bounce-anim" style={{ display: 'block', textAlign: 'center', fontSize: '1.1rem', padding: '15px', borderRadius: '30px' }}>
+            <a href={`https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(successData.message)}`} target="_blank" rel="noopener noreferrer" className="btn btn-primary bounce-anim" style={{ display: 'block', textAlign: 'center', fontSize: '1.1rem', padding: '15px', borderRadius: '30px' }}>
               Konfirmasi ke WhatsApp Admin <i className='bx bxl-whatsapp'></i>
             </a>
           </div>
@@ -479,6 +589,9 @@ export default function Reservation() {
       </div>
 
       <div className="container">
+        {isLoadingCatalog ? (
+          <SkeletonForm />
+        ) : (
         <div className="form-container">
           <p style={{ textAlign: 'center', marginBottom: '30px', fontSize: '0.95rem', color: '#555' }}>
             Sudah reservasi? <Link to="/check-reservation" style={{ color: 'var(--color-primary-brown)', fontWeight: 600, textDecoration: 'underline' }}>Cek status/invoice Anda di sini.</Link>
@@ -537,6 +650,7 @@ export default function Reservation() {
               <div className="form-group">
                 <label>Jam Kedatangan *</label>
                 <input type="time" name="jam_kedatangan" value={formData.jam_kedatangan} onChange={handleChange} className="form-control" required />
+                <small style={{ color: '#666', fontSize: '0.8rem' }}>Check in 14.00-00.00</small>
               </div>
               <div className="form-group">
                 <label>
@@ -578,21 +692,21 @@ export default function Reservation() {
             {/* Pilihan Paket */}
             <h2 className="section-title">Pilihan Paket</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              
+
               {/* Lengkap */}
               <div style={{ display: 'flex', flexDirection: 'column', border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden' }}>
                 {packageDefs.filter(p => p.id.startsWith('lengkap_')).map(p => (
                   <div key={p.id} className={`radio-card ${packages[p.id] > 0 ? 'selected' : ''}`} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', border: 'none', borderBottom: '1px solid #eee', borderRadius: 0, padding: '15px' }}>
                     <div className="radio-content">
-                      <strong>{p.name} <span style={{backgroundColor: 'var(--color-forest-green)', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem'}}>Recommended</span> 
+                      <strong>{p.name} <span style={{ backgroundColor: 'var(--color-forest-green)', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>Recommended</span>
                         <button type="button" className="btn-info-icon" onClick={() => { setActiveInfoPaket(p.id); setActiveModal('info'); }}><i className='bx bx-info-circle'></i></button>
                       </strong>
                       <span>{formatRupiah(p.price)}</span><br />
-                      <small>Termasuk HTM {p.htmPax} org</small>
+                      <small>Belum termasuk HTM</small>
                     </div>
                     <div className="qty-container">
                       <button type="button" className="qty-btn minus" onClick={() => handlePackageChange(p.id, -1)} disabled={p.capacity === 4 && !['Area 1', 'Area 3', 'Area 4', 'Area 5', 'Area 8', 'Campervan', ''].includes(formData.area_camp)}>-</button>
-                      <input type="number" className="qty-input" value={packages[p.id]} readOnly style={{width:'40px', textAlign:'center', border:'none', outline:'none', background:'transparent'}}/>
+                      <input type="number" className="qty-input" value={packages[p.id]} readOnly style={{ width: '40px', textAlign: 'center', border: 'none', outline: 'none', background: 'transparent' }} />
                       <button type="button" className="qty-btn plus" onClick={() => handlePackageChange(p.id, 1)} disabled={p.capacity === 4 && !['Area 1', 'Area 3', 'Area 4', 'Area 5', 'Area 8', 'Campervan', ''].includes(formData.area_camp)}>+</button>
                     </div>
                   </div>
@@ -604,7 +718,7 @@ export default function Reservation() {
                 {packageDefs.filter(p => p.id.startsWith('konten_')).map(p => (
                   <div key={p.id} className={`radio-card ${packages[p.id] > 0 ? 'selected' : ''}`} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', border: 'none', borderBottom: '1px solid #eee', borderRadius: 0, padding: '15px' }}>
                     <div className="radio-content">
-                      <strong>{p.name} <span style={{backgroundColor: 'var(--color-primary-brown)', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem'}}>Best Seller</span> 
+                      <strong>{p.name} <span style={{ backgroundColor: 'var(--color-primary-brown)', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>Best Seller</span>
                         <button type="button" className="btn-info-icon" onClick={() => { setActiveInfoPaket(p.id); setActiveModal('info'); }}><i className='bx bx-info-circle'></i></button>
                       </strong>
                       <span>{formatRupiah(p.price)}</span><br />
@@ -612,7 +726,7 @@ export default function Reservation() {
                     </div>
                     <div className="qty-container">
                       <button type="button" className="qty-btn minus" onClick={() => handlePackageChange(p.id, -1)}>-</button>
-                      <input type="number" className="qty-input" value={packages[p.id]} readOnly style={{width:'40px', textAlign:'center', border:'none', outline:'none', background:'transparent'}}/>
+                      <input type="number" className="qty-input" value={packages[p.id]} readOnly style={{ width: '40px', textAlign: 'center', border: 'none', outline: 'none', background: 'transparent' }} />
                       <button type="button" className="qty-btn plus" onClick={() => handlePackageChange(p.id, 1)}>+</button>
                     </div>
                   </div>
@@ -624,7 +738,7 @@ export default function Reservation() {
                 {packageDefs.filter(p => p.id.startsWith('fullset_')).map(p => (
                   <div key={p.id} className={`radio-card ${packages[p.id] > 0 ? 'selected' : ''}`} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', border: 'none', borderBottom: '1px solid #eee', borderRadius: 0, padding: '15px' }}>
                     <div className="radio-content">
-                      <strong>{p.name}  
+                      <strong>{p.name}
                         <button type="button" className="btn-info-icon" onClick={() => { setActiveInfoPaket(p.id); setActiveModal('info'); }}><i className='bx bx-info-circle'></i></button>
                       </strong>
                       <span>{formatRupiah(p.price)}</span><br />
@@ -632,7 +746,7 @@ export default function Reservation() {
                     </div>
                     <div className="qty-container">
                       <button type="button" className="qty-btn minus" onClick={() => handlePackageChange(p.id, -1)}>-</button>
-                      <input type="number" className="qty-input" value={packages[p.id]} readOnly style={{width:'40px', textAlign:'center', border:'none', outline:'none', background:'transparent'}}/>
+                      <input type="number" className="qty-input" value={packages[p.id]} readOnly style={{ width: '40px', textAlign: 'center', border: 'none', outline: 'none', background: 'transparent' }} />
                       <button type="button" className="qty-btn plus" onClick={() => handlePackageChange(p.id, 1)}>+</button>
                     </div>
                   </div>
@@ -649,7 +763,7 @@ export default function Reservation() {
                   </div>
                   <div className="qty-container">
                     <button type="button" className="qty-btn minus" onClick={() => handlePackageChange('tenda_sendiri', -1)}>-</button>
-                    <input type="number" className="qty-input" value={packages.tenda_sendiri} readOnly style={{width:'40px', textAlign:'center', border:'none', outline:'none', background:'transparent'}}/>
+                    <input type="number" className="qty-input" value={packages.tenda_sendiri} readOnly style={{ width: '40px', textAlign: 'center', border: 'none', outline: 'none', background: 'transparent' }} />
                     <button type="button" className="qty-btn plus" onClick={() => handlePackageChange('tenda_sendiri', 1)}>+</button>
                   </div>
                 </div>
@@ -665,7 +779,7 @@ export default function Reservation() {
                   <span>{a.name} ({formatRupiah(a.price)})</span>
                   <div className="qty-container">
                     <button type="button" className="qty-btn minus" onClick={() => handleAddonChange(a.id, -1)}>-</button>
-                    <input type="number" className="qty-input" value={addons[a.id]} readOnly style={{width:'40px', textAlign:'center', border:'none', outline:'none', background:'transparent'}}/>
+                    <input type="number" className="qty-input" value={addons[a.id]} readOnly style={{ width: '40px', textAlign: 'center', border: 'none', outline: 'none', background: 'transparent' }} />
                     <button type="button" className="qty-btn plus" onClick={() => handleAddonChange(a.id, 1)}>+</button>
                   </div>
                 </div>
@@ -685,16 +799,29 @@ export default function Reservation() {
                     <span>
                       {line.label}
                       {line.removable && (
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           onClick={() => {
-                            if (line.type === 'package') {
-                              handlePackageChange(line.id, -packages[line.id]);
-                            } else if (line.type === 'addon') {
-                              handleAddonChange(line.id, -addons[line.id]);
-                            }
+                            Swal.fire({
+                              title: 'Hapus Item?',
+                              text: `Anda yakin ingin menghapus ${line.label}?`,
+                              icon: 'warning',
+                              showCancelButton: true,
+                              confirmButtonColor: '#d33',
+                              cancelButtonColor: '#aaa',
+                              confirmButtonText: 'Ya, hapus!',
+                              cancelButtonText: 'Batal'
+                            }).then((result) => {
+                              if (result.isConfirmed) {
+                                if (line.type === 'package') {
+                                  handlePackageChange(line.id, -packages[line.id]);
+                                } else if (line.type === 'addon') {
+                                  handleAddonChange(line.id, -addons[line.id]);
+                                }
+                              }
+                            });
                           }}
-                          style={{background:'none', border:'none', color:'red', cursor:'pointer', marginLeft: '5px'}} 
+                          style={{ background: 'none', border: 'none', color: 'red', cursor: 'pointer', marginLeft: '5px' }}
                           title="Hapus Item"
                         >
                           <i className='bx bx-trash'></i>
@@ -714,23 +841,32 @@ export default function Reservation() {
             </div>
 
             <button type="submit" className="btn btn-primary submit-btn" disabled={isSubmitDisabled}>
-              {isSubmitting ? 'Memproses...' : <>Kirim ke WhatsApp Admin <i className='bx bxl-whatsapp'></i></>}
+              {isSubmitting ? 'Memproses...' : <>Submit & Payment <i className='bx bxl-whatsapp'></i></>}
             </button>
           </form>
         </div>
+        )}
       </div>
-
       {/* Modals */}
       {activeModal === 'info' && activeInfoPaket && (
         <div className="modal-overlay active" style={{ display: 'flex' }} onClick={(e) => e.target.classList.contains('modal-overlay') && setActiveModal(null)}>
           <div className="modal-content">
             <div className="modal-header">
-              <h3>{paketDetails[activeInfoPaket].title}</h3>
+              <h3>{packageDefs.find(p => p.id === activeInfoPaket)?.name}</h3>
               <button type="button" className="modal-close" onClick={() => setActiveModal(null)}><i className='bx bx-x'></i></button>
             </div>
             <div className="modal-body">
               <ul style={{ paddingLeft: '20px', lineHeight: 1.6 }}>
-                {paketDetails[activeInfoPaket].items.map((item, idx) => <li key={idx}>{item}</li>)}
+                {(() => {
+                  const pDef = packageDefs.find(p => p.id === activeInfoPaket);
+                  if (!pDef || !pDef.description) return <li>Detail tidak tersedia</li>;
+                  try {
+                    const items = JSON.parse(pDef.description);
+                    return items.map((item, idx) => <li key={idx}>{item}</li>);
+                  } catch(e) {
+                    return <li>{pDef.description}</li>;
+                  }
+                })()}
               </ul>
             </div>
             <div className="modal-footer">
@@ -754,7 +890,7 @@ export default function Reservation() {
                     <span>{a.name} ({formatRupiah(a.price)})</span>
                     <div className="qty-container">
                       <button type="button" className="qty-btn minus" onClick={() => handleAddonChange(a.id, -1)}>-</button>
-                      <input type="number" className="qty-input" value={addons[a.id]} readOnly style={{width:'40px', textAlign:'center', border:'none', outline:'none', background:'transparent'}}/>
+                      <input type="number" className="qty-input" value={addons[a.id]} readOnly style={{ width: '40px', textAlign: 'center', border: 'none', outline: 'none', background: 'transparent' }} />
                       <button type="button" className="qty-btn plus" onClick={() => handleAddonChange(a.id, 1)}>+</button>
                     </div>
                   </div>
@@ -767,7 +903,6 @@ export default function Reservation() {
           </div>
         </div>
       )}
-
     </main>
   );
 }

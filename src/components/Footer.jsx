@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
+import { useSettings } from '../context/SettingsContext';
 
 export default function Footer() {
+  const { settings } = useSettings();
   const [showTopBtn, setShowTopBtn] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
+  const { settings } = useSettings();
       setShowTopBtn(window.scrollY > 300);
     };
     window.addEventListener('scroll', handleScroll);
@@ -12,6 +15,7 @@ export default function Footer() {
   }, []);
 
   const scrollToTop = () => {
+  const { settings } = useSettings();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -34,7 +38,7 @@ export default function Footer() {
       </button>
 
       {/* Sticky WhatsApp */}
-      <a href="https://wa.me/6281234567890" className="sticky-wa" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Admin">
+      <a href="https://wa.me/${settings.whatsapp_number}" className="sticky-wa" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Admin">
         <i className='bx bxl-whatsapp'></i>
       </a>
     </>

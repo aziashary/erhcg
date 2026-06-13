@@ -168,9 +168,6 @@ export default function AdminDashboard() {
           </div>
         ))}
       </div>
-
-      {/* FAB (mobile) */}
-      <button className="fab mob" style={{ display: 'none' }}><i className="bx bx-plus"></i></button>
     </>
   );
 }

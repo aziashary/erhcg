@@ -1,33 +1,53 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
-const AREAS = [2, 3, 4, 5, 6];
+const MAX_AREA_CAPACITY = {
+  'Area 0': 1, 'Area 1': 3, 'Area 2': 5, 'Area 3': 5, 'Area 4': 3,
+  'Area 4 Samping': 1, 'Area 5': 2, 'Area 6': 2, 'Area 7': 2, 'Area 8': 3, 'Campervan': 3
+};
+const AREAS = Object.keys(MAX_AREA_CAPACITY);
 const DAYS = ['MING', 'SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB'];
 
 export default function AdminCalendar() {
-  const [cur, setCur] = useState(new Date());
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  const initSelDate = searchParams.get('selDate') ? new Date(searchParams.get('selDate') + 'T00:00:00+07:00') : null;
+  const [cur, setCur] = useState(initSelDate || new Date());
   const [data, setData] = useState([]);
-  const [selDay, setSelDay] = useState(null);
+  const [selDay, setSelDay] = useState(initSelDate);
   const [loading, setLoading] = useState(true);
+  const detailRef = useRef(null);
 
   useEffect(() => {
+    if (initSelDate && detailRef.current) {
+      setTimeout(() => {
+        detailRef.current.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
     fetch('/api/hq-rockshill/reservations', {
       headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
     })
       .then(r => r.json())
-      .then(res => { setData((res.data || []).filter(r => r.status !== 'Rejected' && r.status !== 'Cancelled')); setLoading(false); })
+      .then(res => { setData((res.data || []).filter(r => r.status === 'Confirmed')); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
 
-  const booked = (date) => {
+  const getBookedInfo = (date) => {
     const d = new Date(date); d.setHours(0, 0, 0, 0);
-    return AREAS.filter(a =>
-      data.some(r => {
-        const ci = new Date(r.checkin); ci.setHours(0, 0, 0, 0);
-        const co = new Date(r.checkout); co.setHours(0, 0, 0, 0);
-        const m = r.area.match(/\d+/);
-        return m && m[0] === a.toString() && d >= ci && d < co;
-      })
-    );
+    const info = {};
+    AREAS.forEach(a => info[a] = 0);
+    
+    data.forEach(r => {
+      const ci = new Date(r.checkin); ci.setHours(0, 0, 0, 0);
+      const co = new Date(r.checkout); co.setHours(0, 0, 0, 0);
+      if (d >= ci && d < co) {
+        if (info[r.area] !== undefined) {
+          info[r.area] += (r.totalTents || 1);
+        }
+      }
+    });
+    return info;
   };
 
   const y = cur.getFullYear(), m = cur.getMonth();
@@ -89,16 +109,33 @@ export default function AdminCalendar() {
         <div className="cal-hdr">{DAYS.map(d => <div key={d}>{d}</div>)}</div>
         <div className="cal-body">
           {cells.map((c, i) => {
-            const bk = c.cur ? booked(c.date) : [];
-            const full = c.cur && bk.length === AREAS.length;
+            const bkInfo = c.cur ? getBookedInfo(c.date) : {};
+            let fullCount = 0;
+            if (c.cur) {
+              AREAS.forEach(a => { if (bkInfo[a] >= MAX_AREA_CAPACITY[a]) fullCount++; });
+            }
+            const full = c.cur && fullCount === AREAS.length;
             return (
               <div key={i} className={`cal-cell ${!c.cur ? 'dim' : ''}`}>
                 <div className={`cal-d ${!c.cur ? 'dim' : ''}`}>{c.d}</div>
                 {c.cur && !full && (
-                  <div className="cal-areas">
-                    {AREAS.map(a => (
-                      <div key={a} className={`cab ${bk.includes(a) ? 'no' : 'ok'}`} title={`Area ${a}`}>A{a}</div>
-                    ))}
+                  <div className="cal-areas" style={{ gap: '2px', display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+                    {AREAS.map(a => {
+                      const bookedTents = bkInfo[a] || 0;
+                      const maxTents = MAX_AREA_CAPACITY[a];
+                      const sisa = maxTents - bookedTents;
+                      let cabClass = '';
+                      if (bookedTents === 0) cabClass = 'avail';
+                      else if (sisa <= 0) cabClass = 'no';
+                      else if (sisa === 1) cabClass = 'warn';
+                      else cabClass = 'ok';
+
+                      return (
+                        <div key={a} className={`cab ${cabClass}`} title={`${a}: ${bookedTents}/${maxTents} Terpesan`} style={{ width: 'auto', padding: '0 4px', textDecoration: cabClass === 'no' ? 'line-through' : 'none' }}>
+                          {a.replace('Area ', 'A').replace('Campervan', 'CV')}: {bookedTents}/{maxTents}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
                 {full && <span className="cal-full">Penuh</span>}
@@ -126,12 +163,20 @@ export default function AdminCalendar() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', padding: '0 4px 8px' }}>
             {cells.map((c, i) => {
-              const bk = c.cur ? booked(c.date) : [];
+              const bkInfo = c.cur ? getBookedInfo(c.date) : {};
+              let fullCount = 0;
+              let partialCount = 0;
+              if (c.cur) {
+                AREAS.forEach(a => {
+                  if (bkInfo[a] >= MAX_AREA_CAPACITY[a]) fullCount++;
+                  else if (bkInfo[a] > 0) partialCount++;
+                });
+              }
               const isSel = selDay && c.date.toDateString() === new Date(selDay).toDateString();
               const isToday = c.date.toDateString() === new Date().toDateString();
               let dot = 'g';
-              if (bk.length === AREAS.length) dot = 'r';
-              else if (bk.length > 0) dot = 'y';
+              if (fullCount === AREAS.length) dot = 'r';
+              else if (fullCount > 0 || partialCount > 0) dot = 'y';
               return (
                 <div key={i} className={`mcal-cell ${!c.cur ? 'dim' : ''} ${isSel ? 'sel' : ''}`}
                   onClick={() => c.cur && setSelDay(c.date)}>
@@ -152,23 +197,33 @@ export default function AdminCalendar() {
         </div>
 
         {selDay && (
-          <div className="cal-detail">
+          <div className="cal-detail" ref={detailRef}>
             <h3>Detail Tanggal: {new Date(selDay).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</h3>
-            {selDayRes.length === 0 ? (
-              <div className="site-card">
-                <div className="site-img"><i className="bx bx-check-circle" style={{ color: 'var(--sec)' }}></i></div>
-                <div className="site-info"><h4>Semua Area Tersedia</h4><p>Tidak ada pemesanan pada tanggal ini</p></div>
-              </div>
-            ) : selDayRes.map(r => (
-              <div key={r.id} className="site-card">
-                <div className="site-img"><i className="bx bxs-home-alt-2"></i></div>
-                <div className="site-info">
-                  <h4>{r.area}</h4>
-                  <p>{r.nama} • {r.wa}</p>
-                  <span className="chip chip-b" style={{ fontSize: 10 }}>Terpesan</span>
-                </div>
-              </div>
-            ))}
+            {AREAS.map(a => {
+               const areaRes = selDayRes.filter(r => r.area === a);
+               const bookedTents = areaRes.reduce((sum, r) => sum + parseInt((r.totalTents || 1), 10), 0);
+               const maxTents = MAX_AREA_CAPACITY[a];
+               const isFull = bookedTents >= maxTents;
+               
+               let dot = 'g';
+               if (bookedTents === 0) dot = 'm'; // dim/abu-abu
+               else if (bookedTents >= maxTents) dot = 'r';
+               else dot = 'y';
+
+               const localDateStr = `${selDay.getFullYear()}-${String(selDay.getMonth()+1).padStart(2, '0')}-${String(selDay.getDate()).padStart(2, '0')}`;
+
+               return (
+                 <div key={a} className="site-card" onClick={() => navigate(`/hq-rockshill/confirmed?date=${localDateStr}&area=${encodeURIComponent(a)}`)} style={{ cursor: 'pointer', borderLeft: `4px solid ${dot === 'm' ? 'var(--outline-var)' : (dot === 'r' ? 'var(--err)' : (dot === 'y' ? '#f7bc6a' : 'var(--sec)'))}` }}>
+                   <div className="site-info" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                     <div>
+                       <h4>{a}</h4>
+                       <p style={{ margin: 0 }}>{bookedTents} dari {maxTents} Tenda Terisi</p>
+                     </div>
+                     <i className="bx bx-chevron-right" style={{ fontSize: 20, color: 'var(--on-dim)' }}></i>
+                   </div>
+                 </div>
+               );
+            })}
           </div>
         )}
       </div>

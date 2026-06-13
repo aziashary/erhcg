@@ -5,11 +5,15 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"regexp"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/aziashary/erhcg/backend/internal/config"
 	"github.com/aziashary/erhcg/backend/internal/models"
 	"github.com/gin-gonic/gin"
+	"gorm.io/datatypes"
 )
 
 func generateInvoiceID() string {
@@ -25,23 +29,55 @@ func generateInvoiceID() string {
 	return fmt.Sprintf("RHCG-%s-%03d%02d", dateStr, count+1, randNum)
 }
 
+func formatRupiah(amount int64) string {
+	s := strconv.FormatInt(amount, 10)
+	n := len(s)
+	if n <= 3 {
+		return "Rp " + s
+	}
+	var res []byte
+	for i := 0; i < n; i++ {
+		if i > 0 && (n-i)%3 == 0 {
+			res = append(res, '.')
+		}
+		res = append(res, s[i])
+	}
+	return "Rp " + string(res)
+}
+
 type ReservationRequest struct {
-	Nama          string `json:"nama" binding:"required"`
-	WA            string `json:"wa" binding:"required"`
-	Email         string `json:"email"`
-	Dewasa        int    `json:"dewasa" binding:"required"`
-	Anak          int    `json:"anak"`
-	Motor         int    `json:"motor"`
-	Mobil         int    `json:"mobil"`
-	Checkin       string `json:"checkin" binding:"required"`
-	Checkout      string `json:"checkout" binding:"required"`
-	JamKedatangan string `json:"jamKedatangan" binding:"required"`
-	Nights        int    `json:"nights" binding:"required"`
-	Area          string `json:"area" binding:"required"`
-	PaketText     string `json:"paketText"`
-	AddonsText    string `json:"addonsText"`
-	PackageName   string `json:"packageName"`
-	Total         string `json:"total"`
+	Nama          string                   `json:"nama" binding:"required"`
+	WA            string                   `json:"wa" binding:"required"`
+	Email         string                   `json:"email"`
+	Dewasa        int                      `json:"dewasa" binding:"required"`
+	Anak          int                      `json:"anak"`
+	Motor         int                      `json:"motor"`
+	Mobil         int                      `json:"mobil"`
+	Checkin       string                   `json:"checkin" binding:"required"`
+	Checkout      string                   `json:"checkout" binding:"required"`
+	JamKedatangan string                   `json:"jamKedatangan" binding:"required"`
+	Nights        int                      `json:"nights"`
+	PaxAdult      int                      `json:"jml_dewasa"`
+	PaxChild      int                      `json:"jml_anak"`
+	Area          string                   `json:"area" binding:"required"`
+	PaketText     string                   `json:"paketText"`
+	AddonsText    string                   `json:"addonsText"`
+	PackageName   string                   `json:"packageName"`
+	Total         string                   `json:"total"`
+	TotalTents    int                      `json:"totalTents"`
+	Items         []ReservationItemRequest `json:"items"`
+	Status        string                   `json:"status"`
+	DPAmount      int64                    `json:"dpAmount"`
+	Discount      int64                    `json:"discount"`
+}
+
+type ReservationItemRequest struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	Quantity int    `json:"quantity"`
+	Price    int64  `json:"price"`
+	Subtotal int64  `json:"subtotal"`
 }
 
 func SubmitReservation(c *gin.Context) {
@@ -64,27 +100,69 @@ func SubmitReservation(c *gin.Context) {
 		"paketText":  req.PaketText,
 		"addonsText": req.AddonsText,
 		"totalStr":   req.Total,
+		"totalTents": req.TotalTents,
+		"discount":   req.Discount,
+		"dpAmount":   req.DPAmount,
 	}
 	itemsJSONBytes, _ := json.Marshal(itemsData)
 
+	totalClean := strings.ReplaceAll(req.Total, "Rp ", "")
+	totalClean = strings.ReplaceAll(totalClean, ".", "")
+	totalAmount, _ := strconv.ParseInt(totalClean, 10, 64)
+
+	var resItems []models.ReservationItem
+	for _, item := range req.Items {
+		resItems = append(resItems, models.ReservationItem{
+			ItemID:   item.ID,
+			ItemName: item.Name,
+			ItemType: item.Type,
+			Quantity: item.Quantity,
+			Price:    item.Price,
+			Subtotal: item.Subtotal,
+		})
+	}
+
+	// Buat Booking Code unik
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	bookingCode := fmt.Sprintf("RCBO-%05d", r.Intn(90000)+10000)
+
+	status := "Menunggu Konfirmasi"
+	if req.Status != "" {
+		status = req.Status
+	}
+
+	invoiceIDPtr := (*string)(nil)
+	if status == "Confirmed" {
+		generatedInv := generateInvoiceID()
+		invoiceIDPtr = &generatedInv
+	}
+
+	paidAmount := int64(0)
+	if status == "Confirmed" {
+		if req.DPAmount > 0 && req.DPAmount < totalAmount {
+			paidAmount = req.DPAmount
+		} else {
+			paidAmount = totalAmount - req.Discount
+		}
+	}
+
 	reservation := models.Reservation{
+		BookingCode:   bookingCode,
+		InvoiceID:     invoiceIDPtr,
 		CustomerName:  req.Nama,
 		CustomerWA:    req.WA,
 		CustomerEmail: req.Email,
 		CheckIn:       checkInDate,
 		CheckOut:      checkOutDate,
 		Nights:        req.Nights,
-		PackageName:   req.PackageName,
 		PaxAdult:      req.Dewasa,
 		PaxChild:      req.Anak,
-		TotalAmount:   0, // Using string in JSON for now
-		ItemsJSON:     itemsJSONBytes,
-		Status:        "Menunggu Konfirmasi",
+		TotalAmount:   totalAmount,
+		Status:        status,
+		PaidAmount:    paidAmount,
+		ItemsJSON:     datatypes.JSON(itemsJSONBytes),
+		Items:         resItems,
 	}
-
-	// Buat Booking Code unik (Invoice ID baru dibuat setelah konfirmasi admin)
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	reservation.BookingCode = fmt.Sprintf("RCBO-%05d", r.Intn(90000)+10000)
 
 	// Simpan ke PostgreSQL via GORM
 	if err := config.DB.Create(&reservation).Error; err != nil {
@@ -103,7 +181,7 @@ func CheckReservation(c *gin.Context) {
 	invoiceID := c.Param("invoiceId")
 
 	var reservation models.Reservation
-	if err := config.DB.Where("invoice_id = ? OR booking_code = ?", invoiceID, invoiceID).First(&reservation).Error; err != nil {
+	if err := config.DB.Preload("Items").Where("invoice_id = ? OR booking_code = ?", invoiceID, invoiceID).First(&reservation).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Reservasi tidak ditemukan"})
 		return
 	}
@@ -137,6 +215,8 @@ func CheckReservation(c *gin.Context) {
 		"paketText":     paketText,
 		"addonsText":    addonsText,
 		"total":         totalStr,
+		"paymentAmount": reservation.PaidAmount,
+		"items":         reservation.Items,
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -147,7 +227,7 @@ func CheckReservation(c *gin.Context) {
 
 func GetAllReservations(c *gin.Context) {
 	var reservations []models.Reservation
-	if err := config.DB.Order("created_at desc").Find(&reservations).Error; err != nil {
+	if err := config.DB.Preload("Items").Order("created_at desc").Find(&reservations).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal mengambil data reservasi"})
 		return
 	}
@@ -157,7 +237,42 @@ func GetAllReservations(c *gin.Context) {
 		var itemsData map[string]interface{}
 		json.Unmarshal(res.ItemsJSON, &itemsData)
 		totalStr, _ := itemsData["totalStr"].(string)
+		
+		if totalStr == "" && res.TotalAmount > 0 {
+			totalStr = formatRupiah(res.TotalAmount)
+		}
+
 		area, _ := itemsData["area"].(string)
+		
+		totalTentsFloat, _ := itemsData["totalTents"].(float64)
+		totalTents := int(totalTentsFloat)
+		
+		paketTextStr, _ := itemsData["paketText"].(string)
+
+		if totalTents == 0 && paketTextStr != "" {
+			re := regexp.MustCompile(`(\d+)x`)
+			matches := re.FindAllStringSubmatch(paketTextStr, -1)
+			for _, m := range matches {
+				if len(m) > 1 {
+					qty, _ := strconv.Atoi(m[1])
+					totalTents += qty
+				}
+			}
+		}
+		if totalTents == 0 {
+			totalTents = 1
+		}
+		
+		paketText := itemsData["paketText"]
+		if len(res.Items) > 0 {
+			var pText strings.Builder
+			for _, it := range res.Items {
+				if it.ItemType == "package" {
+					pText.WriteString(fmt.Sprintf("%dx %s\n", it.Quantity, it.ItemName))
+				}
+			}
+			paketText = pText.String()
+		}
 
 		results = append(results, map[string]interface{}{
 			"id":           res.ID,
@@ -166,17 +281,22 @@ func GetAllReservations(c *gin.Context) {
 			"nama":         res.CustomerName,
 			"wa":           res.CustomerWA,
 			"email":        res.CustomerEmail,
-			"checkin":      res.CheckIn.Format("02-Jan-06"),
-			"checkout":     res.CheckOut.Format("02-Jan-06"),
+			"checkin":      res.CheckIn.Format("2006-01-02"),
+			"checkout":     res.CheckOut.Format("2006-01-02"),
 			"status":       res.Status,
 			"dateCreated":  res.CreatedAt.Format(time.RFC3339),
 			"total":        totalStr,
+			"totalAmount":  res.TotalAmount,
 			"area":         area,
-			"paketText":    res.PackageName, // For MVP we need details
+			"totalTents":   totalTents,
+			"paketText":    paketText,
 			"addonsText":   itemsData["addonsText"],
-			"paymentType":  itemsData["paymentType"],
-			"paymentAmount":itemsData["paymentAmount"],
+			"paymentAmount": res.PaidAmount,
 			"pax":          fmt.Sprintf("%d Dewasa, %d Anak", res.PaxAdult, res.PaxChild),
+			"dewasa":       res.PaxAdult,
+			"anak":         res.PaxChild,
+			"nights":       res.Nights,
+			"items":        res.Items,
 		})
 	}
 
@@ -186,9 +306,9 @@ func GetAllReservations(c *gin.Context) {
 }
 
 type UpdateStatusRequest struct {
-	Status        string `json:"status" binding:"required"`
-	PaymentType   string `json:"paymentType"`
-	PaymentAmount string `json:"paymentAmount"`
+	Status        string      `json:"status"`
+	PaymentAmount interface{} `json:"paymentAmount,omitempty"`
+	DpAmount      interface{} `json:"dpAmount,omitempty"`
 }
 
 func UpdateReservationStatus(c *gin.Context) {
@@ -211,17 +331,17 @@ func UpdateReservationStatus(c *gin.Context) {
 			invoiceID := generateInvoiceID()
 			reservation.InvoiceID = &invoiceID
 		}
-		
-		// Update ItemsJSON with payment details
-		var itemsData map[string]interface{}
-		json.Unmarshal(reservation.ItemsJSON, &itemsData)
-		if itemsData == nil {
-			itemsData = make(map[string]interface{})
+		if req.DpAmount != nil && req.DpAmount != "" {
+			amtClean := strings.ReplaceAll(fmt.Sprintf("%v", req.DpAmount), "Rp ", "")
+			amtClean = strings.ReplaceAll(amtClean, ".", "")
+			amt, _ := strconv.ParseInt(amtClean, 10, 64)
+			reservation.PaidAmount = amt
+		} else if req.PaymentAmount != "" {
+			amtClean := strings.ReplaceAll(fmt.Sprintf("%v", req.PaymentAmount), "Rp ", "")
+			amtClean = strings.ReplaceAll(amtClean, ".", "")
+			amt, _ := strconv.ParseInt(amtClean, 10, 64)
+			reservation.PaidAmount = amt
 		}
-		itemsData["paymentType"] = req.PaymentType
-		itemsData["paymentAmount"] = req.PaymentAmount
-		updatedItemsJSON, _ := json.Marshal(itemsData)
-		reservation.ItemsJSON = updatedItemsJSON
 	}
 
 	if err := config.DB.Save(&reservation).Error; err != nil {
@@ -233,4 +353,68 @@ func UpdateReservationStatus(c *gin.Context) {
 		"message": "Status berhasil diupdate",
 		"status":  req.Status,
 	})
+}
+
+func GetCapacity(c *gin.Context) {
+	startStr := c.Query("start")
+	endStr := c.Query("end")
+
+	if startStr == "" || endStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "start dan end parameter diperlukan"})
+		return
+	}
+
+	startDate, err1 := time.Parse("2006-01-02", startStr)
+	endDate, err2 := time.Parse("2006-01-02", endStr)
+
+	if err1 != nil || err2 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Format tanggal tidak valid"})
+		return
+	}
+
+	var reservations []models.Reservation
+	if err := config.DB.Where("status NOT IN (?, ?) AND check_in < ? AND check_out > ?", "Cancelled", "Rejected", endDate, startDate).Find(&reservations).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal mengambil data reservasi"})
+		return
+	}
+
+	maxCapacityPerArea := make(map[string]int)
+
+	for d := startDate; d.Before(endDate); d = d.AddDate(0, 0, 1) {
+		dailySum := make(map[string]int)
+		for _, res := range reservations {
+			if !res.CheckIn.After(d) && res.CheckOut.After(d) {
+				var itemsData map[string]interface{}
+				json.Unmarshal(res.ItemsJSON, &itemsData)
+				area, _ := itemsData["area"].(string)
+				totalTentsFloat, _ := itemsData["totalTents"].(float64)
+				totalTents := int(totalTentsFloat)
+				paketTextStr, _ := itemsData["paketText"].(string)
+				
+				if totalTents == 0 && paketTextStr != "" {
+					re := regexp.MustCompile(`(\d+)x`)
+					matches := re.FindAllStringSubmatch(paketTextStr, -1)
+					for _, m := range matches {
+						if len(m) > 1 {
+							qty, _ := strconv.Atoi(m[1])
+							totalTents += qty
+						}
+					}
+				}
+				if totalTents == 0 {
+					totalTents = 1
+				}
+
+				dailySum[area] += totalTents
+			}
+		}
+
+		for area, sum := range dailySum {
+			if sum > maxCapacityPerArea[area] {
+				maxCapacityPerArea[area] = sum
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": maxCapacityPerArea})
 }

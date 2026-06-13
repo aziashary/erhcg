@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useSettings } from '../context/SettingsContext';
 import HeroCanvas from '../components/HeroCanvas';
 
 export default function Home() {
+  const { settings } = useSettings();
   const [activeFaq, setActiveFaq] = useState(null);
 
   const toggleFaq = (index) => {
@@ -333,7 +335,7 @@ export default function Home() {
           <p style={{ fontSize: '1.2rem', marginBottom: '20px' }}>Amankan spot terbaik Anda hari ini. Slot terbatas setiap akhir pekan!</p>
           <div className="final-btns">
             <Link to="/reservation" className="btn btn-outline">Reservasi Online</Link>
-            <a href="https://wa.me/6281234567890" className="btn btn-secondary" target="_blank" rel="noopener noreferrer"><i className='bx bxl-whatsapp'></i> Hubungi Admin</a>
+            <a href="https://wa.me/${settings.whatsapp_number}" className="btn btn-secondary" target="_blank" rel="noopener noreferrer"><i className='bx bxl-whatsapp'></i> Hubungi Admin</a>
           </div>
         </div>
       </section>

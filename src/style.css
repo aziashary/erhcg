@@ -857,17 +857,26 @@ footer {
 
 /* Quantity Inputs */
 .qty-container {
-  display: flex; align-items: center; border: 1px solid #ccc;
-  border-radius: 6px; overflow: hidden; background: white;
+  display: flex; align-items: center; justify-content: space-between;
+  background: #fffcf8; border-radius: 40px; padding: 6px;
+  width: 125px;
 }
 .qty-btn {
-  background: #f0f0f0; border: none; width: 30px; height: 30px;
-  cursor: pointer; font-weight: bold; color: #333;
+  width: 36px; height: 36px; border-radius: 50%;
+  cursor: pointer; font-weight: bold; font-size: 22px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s ease; line-height: 1; padding: 0; margin: 0;
 }
-.qty-btn:hover { background: #e0e0e0; }
+.qty-btn.minus {
+  background: #fff; border: 3px solid #e6ded5; color: #a0a0a0;
+}
+.qty-btn.plus {
+  background: var(--pri, #b88645); border: none; color: #fff;
+}
+.qty-btn:active { transform: scale(0.95); }
 .qty-input {
-  width: 40px; border: none; text-align: center; font-weight: 600;
-  color: var(--color-dark-brown); -moz-appearance: textfield;
+  width: 32px; border: none; text-align: center; font-weight: 800; font-size: 20px;
+  color: #333; background: transparent; -moz-appearance: textfield; padding: 0; margin: 0;
 }
 .qty-input::-webkit-outer-spin-button,
 .qty-input::-webkit-inner-spin-button {
@@ -1343,4 +1352,37 @@ input[type="date"].form-control, input[type="time"].form-control { -webkit-appea
   width: 60%;
   margin-bottom: 24px;
   border-radius: 4px;
+}
+
+/* Skeleton Loader */
+.skeleton-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.skeleton-box {
+  background: #f6f7f8;
+  background-image: linear-gradient(
+    to right,
+    #f6f7f8 0%,
+    #edeef1 20%,
+    #f6f7f8 40%,
+    #f6f7f8 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 200% 100%; 
+  animation-duration: 1.5s;
+  animation-fill-mode: forwards; 
+  animation-iteration-count: infinite;
+  animation-name: placeholderShimmer;
+  animation-timing-function: linear;
+  border-radius: 8px;
+}
+@keyframes placeholderShimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
 }
